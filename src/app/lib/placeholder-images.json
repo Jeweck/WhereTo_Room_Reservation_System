@@ -1,0 +1,35 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "auditorium",
+      "description": "Main School Auditorium",
+      "imageUrl": "https://picsum.photos/seed/aud/800/600",
+      "imageHint": "auditorium theater"
+    },
+    {
+      "id": "conference",
+      "description": "Modern Conference Room",
+      "imageUrl": "https://picsum.photos/seed/conf/800/600",
+      "imageHint": "conference meeting"
+    },
+    {
+      "id": "study",
+      "description": "Cozy Study Room",
+      "imageUrl": "https://picsum.photos/seed/study/800/600",
+      "imageHint": "study library"
+    },
+    {
+      "id": "lab",
+      "description": "Computer Laboratory",
+      "imageUrl": "https://picsum.photos/seed/lab/800/600",
+      "imageHint": "computer laboratory"
+    },
+    {
+      "id": "classroom",
+      "description": "Spacious Classroom",
+      "imageUrl": "https://picsum.photos/seed/class/800/600",
+      "imageHint": "classroom school"
+    }
+  ]
+}
