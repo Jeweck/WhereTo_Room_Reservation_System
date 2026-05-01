@@ -51,6 +51,12 @@ export function useStore() {
     localStorage.setItem('whereto_bookings', JSON.stringify(newBookings));
   };
 
+  const approveBooking = (id: string) => {
+    const newBookings = bookings.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b);
+    setBookings(newBookings);
+    localStorage.setItem('whereto_bookings', JSON.stringify(newBookings));
+  };
+
   const upsertFacility = (facility: Facility) => {
     const exists = facilities.find(f => f.id === facility.id);
     let newFacilities;
@@ -77,6 +83,7 @@ export function useStore() {
     logout,
     addBooking,
     cancelBooking,
+    approveBooking,
     upsertFacility,
     deleteFacility
   };

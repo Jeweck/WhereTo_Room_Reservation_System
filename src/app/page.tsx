@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Building2, ArrowRight, Mail, Lock } from 'lucide-react';
+import { MapPin, ArrowRight, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -49,7 +49,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="mb-8 text-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-700">
         <div className="w-16 h-16 bg-primary rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-primary/20">
-          <Building2 className="w-8 h-8 text-white" />
+          <MapPin className="w-8 h-8 text-white" />
         </div>
         <div>
           <h1 className="text-4xl font-headline font-bold text-primary tracking-tight">WhereTo</h1>

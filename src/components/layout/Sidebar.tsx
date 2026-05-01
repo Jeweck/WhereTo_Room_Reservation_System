@@ -9,7 +9,8 @@ import {
   CalendarCheck, 
   Sparkles, 
   LogOut,
-  ShieldCheck
+  ShieldCheck,
+  MapPin
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -34,7 +35,7 @@ export function Sidebar() {
     <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground w-64 fixed left-0 top-0 z-50 transition-all duration-300">
       <div className="p-6 flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
-          <Building2 className="text-secondary-foreground w-6 h-6" />
+          <MapPin className="text-secondary-foreground w-6 h-6" />
         </div>
         <span className="font-headline font-bold text-xl tracking-tight">WhereTo</span>
       </div>
