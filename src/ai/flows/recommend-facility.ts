@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI agent that recommends suitable facilities based on natural language requests.
@@ -136,7 +137,7 @@ const recommendFacilityPrompt = ai.definePrompt({
   input: { schema: RecommendFacilityInputSchema },
   output: { schema: RecommendFacilityOutputSchema },
   tools: [findAvailableFacilities],
-  prompt: `You are an intelligent facility reservation assistant for AcademiaReserve.
+  prompt: `You are an intelligent facility reservation assistant for WhereTo, the campus resource management system for Gordon College.
 Your primary goal is to help users find the most suitable facilities based on their natural language requests.
 
 Your task is to:

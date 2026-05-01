@@ -3,7 +3,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'AcademiaReserve - Smart Facility Booking',
+  title: 'WhereTo - Smart Facility Booking',
   description: 'Streamline school facility reservations with AI-powered recommendations and intelligent scheduling.',
 };
 

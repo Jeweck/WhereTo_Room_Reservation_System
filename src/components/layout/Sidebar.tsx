@@ -9,7 +9,6 @@ import {
   CalendarCheck, 
   Sparkles, 
   LogOut,
-  Settings,
   ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -37,7 +36,7 @@ export function Sidebar() {
         <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
           <Building2 className="text-secondary-foreground w-6 h-6" />
         </div>
-        <span className="font-headline font-bold text-xl tracking-tight">Academia</span>
+        <span className="font-headline font-bold text-xl tracking-tight">WhereTo</span>
       </div>
 
       <nav className="flex-1 px-4 py-6 space-y-1">

@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { User, Facility, Booking } from '@/lib/types';
-import { INITIAL_FACILITIES, INITIAL_BOOKINGS, MOCK_USERS } from '@/lib/mock-data';
+import { INITIAL_FACILITIES, INITIAL_BOOKINGS } from '@/lib/mock-data';
 
 export function useStore() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -11,37 +11,44 @@ export function useStore() {
   const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('academia_user');
+    const savedUser = localStorage.getItem('whereto_user');
     if (savedUser) setCurrentUser(JSON.parse(savedUser));
     
-    const savedFacilities = localStorage.getItem('academia_facilities');
+    const savedFacilities = localStorage.getItem('whereto_facilities');
     if (savedFacilities) setFacilities(JSON.parse(savedFacilities));
 
-    const savedBookings = localStorage.getItem('academia_bookings');
+    const savedBookings = localStorage.getItem('whereto_bookings');
     if (savedBookings) setBookings(JSON.parse(savedBookings));
   }, []);
 
-  const login = (role: 'admin' | 'user') => {
-    const user = MOCK_USERS.find(u => u.role === role) || MOCK_USERS[0];
+  const loginWithEmail = (email: string) => {
+    const isAdmin = email.includes('admin');
+    const name = email.split('@')[0].replace(/\d+/g, '').replace('admin', '') || 'GC User';
+    const user: User = {
+      id: Math.random().toString(36).substr(2, 9),
+      name: isAdmin ? 'Admin User' : (name.charAt(0).toUpperCase() + name.slice(1) || 'Student'),
+      email,
+      role: isAdmin ? 'admin' : 'user'
+    };
     setCurrentUser(user);
-    localStorage.setItem('academia_user', JSON.stringify(user));
+    localStorage.setItem('whereto_user', JSON.stringify(user));
   };
 
   const logout = () => {
     setCurrentUser(null);
-    localStorage.removeItem('academia_user');
+    localStorage.removeItem('whereto_user');
   };
 
   const addBooking = (booking: Booking) => {
     const newBookings = [...bookings, booking];
     setBookings(newBookings);
-    localStorage.setItem('academia_bookings', JSON.stringify(newBookings));
+    localStorage.setItem('whereto_bookings', JSON.stringify(newBookings));
   };
 
   const cancelBooking = (id: string) => {
     const newBookings = bookings.map(b => b.id === id ? { ...b, status: 'cancelled' as const } : b);
     setBookings(newBookings);
-    localStorage.setItem('academia_bookings', JSON.stringify(newBookings));
+    localStorage.setItem('whereto_bookings', JSON.stringify(newBookings));
   };
 
   const upsertFacility = (facility: Facility) => {
@@ -53,20 +60,20 @@ export function useStore() {
       newFacilities = [...facilities, facility];
     }
     setFacilities(newFacilities);
-    localStorage.setItem('academia_facilities', JSON.stringify(newFacilities));
+    localStorage.setItem('whereto_facilities', JSON.stringify(newFacilities));
   };
 
   const deleteFacility = (id: string) => {
     const newFacilities = facilities.filter(f => f.id !== id);
     setFacilities(newFacilities);
-    localStorage.setItem('academia_facilities', JSON.stringify(newFacilities));
+    localStorage.setItem('whereto_facilities', JSON.stringify(newFacilities));
   };
 
   return {
     currentUser,
     facilities,
     bookings,
-    login,
+    loginWithEmail,
     logout,
     addBooking,
     cancelBooking,
