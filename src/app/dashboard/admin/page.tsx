@@ -2,12 +2,10 @@
 "use client"
 
 import { useStore } from '@/hooks/use-store';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
   ShieldCheck, 
-  Building2, 
-  Users, 
   AlertTriangle,
   CheckCircle2,
   XCircle,
@@ -20,11 +18,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 
 export default function AdminPage() {
-  const { facilities, bookings, currentUser, approveBooking, cancelBooking } = useStore();
+  const { bookings, currentUser, approveBooking, cancelBooking } = useStore();
 
   // Filter bookings to show pending first or group them
   const pendingBookings = bookings.filter(b => b.status === 'pending');
-  const otherBookings = bookings.filter(b => b.status !== 'pending');
+  const allBookings = bookings;
 
   if (currentUser?.role !== 'admin') {
     return (
@@ -49,15 +47,12 @@ export default function AdminPage() {
       </div>
 
       <Tabs defaultValue="pending" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 bg-white p-1 border shadow-sm max-w-xl">
+        <TabsList className="grid w-full grid-cols-2 bg-white p-1 border shadow-sm max-w-md">
           <TabsTrigger value="pending" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             Pending ({pendingBookings.length})
           </TabsTrigger>
           <TabsTrigger value="history" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-            All Bookings ({bookings.length})
-          </TabsTrigger>
-          <TabsTrigger value="facilities" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-            Facilities ({facilities.length})
+            All Records ({allBookings.length})
           </TabsTrigger>
         </TabsList>
 
@@ -126,13 +121,13 @@ export default function AdminPage() {
 
         <TabsContent value="history" className="space-y-6">
           <div className="grid grid-cols-1 gap-4">
-            {bookings.length === 0 ? (
+            {allBookings.length === 0 ? (
               <div className="py-20 text-center text-muted-foreground">
                 <CalendarDays className="w-12 h-12 mx-auto mb-4 opacity-10" />
                 <p>No booking records found.</p>
               </div>
             ) : (
-              bookings.map((booking) => (
+              allBookings.map((booking) => (
                 <Card key={booking.id} className="border-none shadow-sm overflow-hidden opacity-90 hover:opacity-100 transition-opacity">
                   <CardContent className="p-0">
                     <div className="flex">
@@ -164,29 +159,6 @@ export default function AdminPage() {
                 </Card>
               ))
             )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="facilities" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {facilities.map((facility) => (
-              <Card key={facility.id} className="border-none shadow-sm">
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center flex-shrink-0">
-                      <Building2 className="w-6 h-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold">{facility.name}</h3>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                        <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {facility.capacity}</span>
-                        <span>{facility.purpose}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </TabsContent>
       </Tabs>
