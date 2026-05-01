@@ -2,7 +2,7 @@
 "use client"
 
 import { useStore } from '@/hooks/use-store';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { 
   Calendar, 
   Clock, 
@@ -10,9 +10,8 @@ import {
   MoreVertical, 
   CheckCircle2, 
   XCircle, 
-  AlertCircle,
-  Search,
-  History
+  History,
+  AlertCircle
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,11 +27,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 export default function MyBookingsPage() {
   const { bookings, currentUser, cancelBooking } = useStore();
 
-  const myBookings = currentUser?.role === 'admin' 
-    ? bookings 
-    : bookings.filter(b => b.userId === currentUser?.id);
+  const myBookings = bookings.filter(b => b.userId === currentUser?.id);
 
-  const activeBookings = myBookings.filter(b => b.status === 'confirmed');
+  const activeBookings = myBookings.filter(b => b.status === 'confirmed' || b.status === 'pending');
   const pastBookings = myBookings.filter(b => b.status === 'cancelled');
 
   const handleCancel = (id: string) => {
@@ -52,7 +49,10 @@ export default function MyBookingsPage() {
           <Card key={booking.id} className="border-none shadow-sm overflow-hidden hover:shadow-md transition-all">
             <CardContent className="p-0">
               <div className="flex flex-col md:flex-row">
-                <div className={`md:w-2 ${booking.status === 'confirmed' ? 'bg-secondary' : 'bg-muted-foreground/30'}`} />
+                <div className={`md:w-2 ${
+                  booking.status === 'confirmed' ? 'bg-secondary' : 
+                  booking.status === 'pending' ? 'bg-yellow-400' : 'bg-muted-foreground/30'
+                }`} />
                 <div className="flex-1 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-start gap-4">
                     <div className="hidden sm:flex w-14 h-14 rounded-2xl bg-primary/5 items-center justify-center flex-shrink-0">
@@ -80,6 +80,10 @@ export default function MyBookingsPage() {
                         <Badge className="bg-secondary/10 text-secondary hover:bg-secondary/20 border-none px-3 py-1">
                           <CheckCircle2 className="w-3 h-3 mr-1" /> Confirmed
                         </Badge>
+                      ) : booking.status === 'pending' ? (
+                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 px-3 py-1">
+                          <AlertCircle className="w-3 h-3 mr-1" /> Pending Approval
+                        </Badge>
                       ) : (
                         <Badge variant="outline" className="text-muted-foreground px-3 py-1">
                           <XCircle className="w-3 h-3 mr-1" /> Cancelled
@@ -87,7 +91,7 @@ export default function MyBookingsPage() {
                       )}
                     </div>
                     
-                    {booking.status === 'confirmed' && (
+                    {(booking.status === 'confirmed' || booking.status === 'pending') && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="text-muted-foreground">
@@ -98,8 +102,6 @@ export default function MyBookingsPage() {
                           <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleCancel(booking.id)}>
                             Cancel Reservation
                           </DropdownMenuItem>
-                          <DropdownMenuItem>Modify Booking</DropdownMenuItem>
-                          <DropdownMenuItem>Email Receipt</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     )}
@@ -117,15 +119,15 @@ export default function MyBookingsPage() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-headline font-bold text-primary">Booking History</h1>
-          <p className="text-muted-foreground">Manage your current and past reservations.</p>
+          <h1 className="text-3xl font-headline font-bold text-primary">My Reservations</h1>
+          <p className="text-muted-foreground">Manage your current and past facility requests.</p>
         </div>
       </div>
 
       <Tabs defaultValue="active" className="space-y-6">
         <TabsList className="bg-white p-1 border shadow-sm">
           <TabsTrigger value="active" className="rounded-md data-[state=active]:bg-primary data-[state=active]:text-white">
-            Upcoming ({activeBookings.length})
+            Current & Pending ({activeBookings.length})
           </TabsTrigger>
           <TabsTrigger value="past" className="rounded-md data-[state=active]:bg-primary data-[state=active]:text-white">
             History ({pastBookings.length})

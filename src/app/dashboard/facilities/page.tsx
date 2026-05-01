@@ -12,8 +12,7 @@ import {
   Package, 
   Calendar, 
   ChevronRight,
-  Filter,
-  Plus
+  Filter
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -50,7 +49,7 @@ export default function FacilitiesPage() {
     return bookings.some(b => 
       b.facilityId === facilityId && 
       b.date === bookingDate && 
-      b.status === 'confirmed' &&
+      (b.status === 'confirmed' || b.status === 'pending') &&
       ((start >= b.startTime && start < b.endTime) || (end > b.startTime && end <= b.endTime))
     );
   };
@@ -63,8 +62,8 @@ export default function FacilitiesPage() {
 
     if (checkConflicts(selectedFacility.id, date, startTime, endTime)) {
       toast({ 
-        title: "Booking Conflict", 
-        description: "The selected time slot is already reserved for this facility.", 
+        title: "Schedule Conflict", 
+        description: "This time slot is either booked or has a pending request.", 
         variant: "destructive" 
       });
       return;
@@ -80,13 +79,19 @@ export default function FacilitiesPage() {
       startTime,
       endTime,
       purpose,
-      status: 'confirmed' as const
+      status: 'pending' as const
     };
 
     addBooking(newBooking);
-    toast({ title: "Success", description: "Booking confirmed successfully!" });
+    toast({ 
+      title: "Request Submitted", 
+      description: "Your reservation request has been sent for administrative approval." 
+    });
     setSelectedFacility(null);
     setPurpose('');
+    setDate('');
+    setStartTime('');
+    setEndTime('');
   };
 
   return (
@@ -160,7 +165,7 @@ export default function FacilitiesPage() {
                   <DialogHeader>
                     <DialogTitle>Reserve {selectedFacility?.name}</DialogTitle>
                     <DialogDescription>
-                      Check availability and submit your reservation request.
+                      Your reservation will be sent to the administrator for approval.
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
@@ -180,11 +185,11 @@ export default function FacilitiesPage() {
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="purpose">Purpose</Label>
-                      <Input id="purpose" placeholder="Briefly describe the event" value={purpose} onChange={(e) => setPurpose(e.target.value)} />
+                      <Input id="purpose" placeholder="Ex: Student Org Meeting" value={purpose} onChange={(e) => setPurpose(e.target.value)} />
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button type="submit" onClick={handleBooking} className="w-full">Confirm Reservation</Button>
+                    <Button type="submit" onClick={handleBooking} className="w-full">Submit for Approval</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
