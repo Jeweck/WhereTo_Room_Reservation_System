@@ -20,7 +20,6 @@ import { Badge } from '@/components/ui/badge';
 export default function AdminPage() {
   const { bookings, currentUser, approveBooking, cancelBooking } = useStore();
 
-  // Filter bookings to show pending first or group them
   const pendingBookings = bookings.filter(b => b.status === 'pending');
   const allBookings = bookings;
 
@@ -91,7 +90,7 @@ export default function AdminPage() {
 
                         <div className="flex gap-2 w-full md:w-auto">
                           <Button 
-                            className="flex-1 md:flex-none bg-secondary text-white hover:bg-secondary/90"
+                            className="flex-1 md:flex-none bg-green-600 text-white hover:bg-green-700"
                             onClick={() => {
                               approveBooking(booking.id);
                               toast({ title: "Approved", description: "The reservation has been confirmed." });
@@ -132,7 +131,7 @@ export default function AdminPage() {
                   <CardContent className="p-0">
                     <div className="flex">
                       <div className={`w-2 ${
-                        booking.status === 'confirmed' ? 'bg-secondary' : 
+                        booking.status === 'confirmed' ? 'bg-green-600' : 
                         booking.status === 'pending' ? 'bg-yellow-400' : 'bg-destructive'
                       }`} />
                       <div className="flex-1 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -149,7 +148,7 @@ export default function AdminPage() {
                         </div>
                         {booking.status === 'pending' && (
                           <div className="flex gap-2">
-                            <Button size="sm" variant="secondary" onClick={() => approveBooking(booking.id)}>Approve</Button>
+                            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => approveBooking(booking.id)}>Approve</Button>
                             <Button size="sm" variant="outline" className="text-destructive" onClick={() => cancelBooking(booking.id)}>Reject</Button>
                           </div>
                         )}
