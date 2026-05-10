@@ -49,8 +49,10 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="mb-8 text-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-700">
-        <div className="w-16 h-16 bg-primary rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-primary/20">
-          <MapPin className="w-8 h-8 text-white" />
+        <div className="w-20 h-20 bg-primary rounded-2xl mx-auto flex items-center justify-center p-2 shadow-xl shadow-primary/20">
+          <div className="w-full h-full bg-white rounded-full flex items-center justify-center shadow-inner">
+            <MapPin className="w-10 h-10 text-primary" />
+          </div>
         </div>
         <div>
           <h1 className="text-4xl font-headline font-bold text-primary tracking-tight">WhereTo</h1>
@@ -111,7 +113,7 @@ export default function LoginPage() {
             </div>
             <Button 
               type="submit" 
-              className="w-full h-12 text-base font-semibold group" 
+              className="w-full h-12 text-base font-semibold group bg-primary text-white hover:opacity-90" 
               disabled={loading}
             >
               {loading ? 'Authenticating...' : 'Sign In'}
