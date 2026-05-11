@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { User, Facility, Booking } from '@/lib/types';
+import { User, Facility, Booking, Role } from '@/lib/types';
 import { INITIAL_FACILITIES, INITIAL_BOOKINGS } from '@/lib/mock-data';
 
 export function useStore() {
@@ -22,22 +22,25 @@ export function useStore() {
   }, []);
 
   const loginWithEmail = (email: string, displayName?: string | null) => {
-    const isAdmin = email.includes('admin');
+    // Role logic: Check for "ADMIN" in the email prefix
+    const emailPrefix = email.split('@')[0].toUpperCase();
+    const isAdmin = emailPrefix.includes('ADMIN');
+    const role: Role = isAdmin ? 'admin' : 'student';
+    
     let name = displayName || '';
     
     if (!name) {
-      const emailPrefix = email.split('@')[0];
       // If the email is just a student ID (numbers only)
-      if (/^\d+$/.test(emailPrefix)) {
-        name = isAdmin ? 'Admin' : 'Gordon College Student';
+      if (/^\d+$/.test(emailPrefix.replace('ADMIN', ''))) {
+        name = isAdmin ? 'Administrator' : 'Gordon College Student';
       } else {
         // Clean up email prefix for names like "john.doe"
         name = emailPrefix
           .replace(/\d+/g, '') // Remove numbers
-          .replace('admin', '') // Remove admin tag
+          .replace('ADMIN', '') // Remove admin tag
           .split(/[._-]/)      // Split by common separators
           .filter(Boolean)
-          .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+          .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
           .join(' ') || (isAdmin ? 'Admin User' : 'Gordon College User');
       }
     }
@@ -46,7 +49,7 @@ export function useStore() {
       id: Math.random().toString(36).substr(2, 9),
       name,
       email,
-      role: isAdmin ? 'admin' : 'user'
+      role
     };
     setCurrentUser(user);
     localStorage.setItem('whereto_user', JSON.stringify(user));

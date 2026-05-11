@@ -37,14 +37,9 @@ export default function LoginPage() {
 
     setLoading(true);
     
-    // Simulate network delay for manual login
+    // Role determination logic is handled inside useStore's loginWithEmail
     setTimeout(() => {
       loginWithEmail(email);
-      const isAdmin = email.includes('admin');
-      toast({
-        title: "Welcome to WhereTo",
-        description: `Logged in as ${isAdmin ? 'Administrator' : 'Student/Faculty'}.`,
-      });
       router.push('/dashboard');
       setLoading(false);
     }, 1000);
@@ -82,17 +77,13 @@ export default function LoginPage() {
       if (user.email) {
         // Log in the user in our local store for dashboard access
         loginWithEmail(user.email, user.displayName);
-        toast({
-          title: "Welcome to WhereTo",
-          description: `Logged in with Google as ${user.displayName || 'User'}.`,
-        });
         router.push('/dashboard');
       }
     } catch (error: any) {
       console.error("Google Sign-In Error:", error);
       toast({
         title: "Authentication Error",
-        description: error.message || "Failed to sign in with Google. Ensure authorized domains are set in Firebase Console.",
+        description: error.message || "Failed to sign in with Google.",
         variant: "destructive"
       });
     } finally {
@@ -134,7 +125,7 @@ export default function LoginPage() {
                 />
               </div>
               <p className="text-[10px] text-muted-foreground">
-                Tip: Include "admin" in your email to access administrative tools.
+                Tip: Use an email with "ADMIN" in the prefix for administrative access.
               </p>
             </div>
             <div className="space-y-2">
