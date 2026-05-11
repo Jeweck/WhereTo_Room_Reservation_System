@@ -58,6 +58,7 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
+      // School domain validation
       if (user.email && !user.email.endsWith('gordoncollege.edu.ph')) {
         toast({
           title: "Access Denied",
@@ -70,6 +71,7 @@ export default function LoginPage() {
       }
 
       if (user.email) {
+        // Log in the user in our local store
         loginWithEmail(user.email);
         toast({
           title: "Welcome to WhereTo",
