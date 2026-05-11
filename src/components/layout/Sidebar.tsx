@@ -33,7 +33,7 @@ export function Sidebar() {
 
   const getInitials = (name: string) => {
     if (!name) return 'U';
-    const parts = name.trim().split(' ');
+    const parts = name.trim().split(/\s+/);
     if (parts.length >= 2) {
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
@@ -72,23 +72,30 @@ export function Sidebar() {
 
       <div className="p-4 border-t border-sidebar-border mt-auto">
         <div className="flex items-center gap-3 p-3 mb-4 rounded-lg bg-sidebar-accent/30">
-          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold uppercase text-secondary-foreground flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold uppercase text-secondary-foreground flex-shrink-0 shadow-sm border border-white/10">
             {getInitials(currentUser?.name || '')}
           </div>
           <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-semibold truncate text-white">{currentUser?.name || 'Guest User'}</span>
-            <span className="text-xs text-sidebar-foreground/50 truncate capitalize">{currentUser?.role || 'User'}</span>
+            <span className="text-sm font-semibold truncate text-white leading-tight">
+              {currentUser?.name || 'Guest User'}
+            </span>
+            <span className="text-[10px] text-sidebar-foreground/60 truncate leading-tight">
+              {currentUser?.email || 'No email provided'}
+            </span>
+            <span className="text-[9px] font-bold text-secondary uppercase mt-0.5 tracking-wider">
+              {currentUser?.role || 'User'}
+            </span>
           </div>
         </div>
         <Button 
           variant="ghost" 
-          className="w-full justify-start text-sidebar-foreground/70 hover:text-white hover:bg-destructive/10 hover:text-destructive group"
+          className="w-full justify-start text-sidebar-foreground/70 hover:text-white hover:bg-destructive/10 hover:text-destructive group h-9"
           onClick={() => {
             logout();
             window.location.href = '/';
           }}
         >
-          <LogOut className="mr-3 h-5 w-5 group-hover:text-destructive" />
+          <LogOut className="mr-3 h-4 w-4 group-hover:text-destructive" />
           Sign Out
         </Button>
       </div>
