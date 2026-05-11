@@ -81,7 +81,7 @@ export default function LoginPage() {
 
       if (user.email) {
         // Log in the user in our local store for dashboard access
-        loginWithEmail(user.email);
+        loginWithEmail(user.email, user.displayName);
         toast({
           title: "Welcome to WhereTo",
           description: `Logged in with Google as ${user.displayName || 'User'}.`,
@@ -92,7 +92,7 @@ export default function LoginPage() {
       console.error("Google Sign-In Error:", error);
       toast({
         title: "Authentication Error",
-        description: error.message || "Failed to sign in with Google. Ensure both port 6000 and 9002 domains are authorized in Firebase Console.",
+        description: error.message || "Failed to sign in with Google. Ensure authorized domains are set in Firebase Console.",
         variant: "destructive"
       });
     } finally {

@@ -21,12 +21,20 @@ export function useStore() {
     if (savedBookings) setBookings(JSON.parse(savedBookings));
   }, []);
 
-  const loginWithEmail = (email: string) => {
+  const loginWithEmail = (email: string, displayName?: string | null) => {
     const isAdmin = email.includes('admin');
-    const name = email.split('@')[0].replace(/\d+/g, '').replace('admin', '') || 'GC User';
+    let name = '';
+    
+    if (displayName) {
+      name = displayName;
+    } else {
+      const emailName = email.split('@')[0].replace(/\d+/g, '').replace('admin', '') || 'GC User';
+      name = isAdmin ? 'Admin User' : (emailName.charAt(0).toUpperCase() + emailName.slice(1) || 'Student');
+    }
+
     const user: User = {
       id: Math.random().toString(36).substr(2, 9),
-      name: isAdmin ? 'Admin User' : (name.charAt(0).toUpperCase() + name.slice(1) || 'Student'),
+      name,
       email,
       role: isAdmin ? 'admin' : 'user'
     };

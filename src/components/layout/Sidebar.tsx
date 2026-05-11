@@ -31,6 +31,15 @@ export function Sidebar() {
     menuItems.push({ label: 'Admin Panel', href: '/dashboard/admin', icon: ShieldCheck });
   }
 
+  const getInitials = (name: string) => {
+    if (!name) return 'U';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
   return (
     <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground w-64 fixed left-0 top-0 z-50 transition-all duration-300">
       <div className="p-6 flex items-center gap-3">
@@ -63,8 +72,8 @@ export function Sidebar() {
 
       <div className="p-4 border-t border-sidebar-border mt-auto">
         <div className="flex items-center gap-3 p-3 mb-4 rounded-lg bg-sidebar-accent/30">
-          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold uppercase text-secondary-foreground">
-            {currentUser?.name?.[0] || 'U'}
+          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold uppercase text-secondary-foreground flex-shrink-0">
+            {getInitials(currentUser?.name || '')}
           </div>
           <div className="flex flex-col overflow-hidden">
             <span className="text-sm font-semibold truncate text-white">{currentUser?.name || 'Guest User'}</span>
