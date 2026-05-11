@@ -32,12 +32,16 @@ export function Sidebar() {
   }
 
   const getInitials = (name: string) => {
-    if (!name) return 'U';
+    if (!name) return 'GC';
     const parts = name.trim().split(/\s+/);
     if (parts.length >= 2) {
+      // Get first letter of first name and first letter of last name
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
-    return name.slice(0, 2).toUpperCase();
+    if (parts.length === 1 && parts[0]) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return 'GC';
   };
 
   return (
@@ -77,7 +81,7 @@ export function Sidebar() {
           </div>
           <div className="flex flex-col overflow-hidden">
             <span className="text-sm font-semibold truncate text-white leading-tight">
-              {currentUser?.name || 'Guest User'}
+              {currentUser?.name || 'Gordon College User'}
             </span>
             <span className="text-[10px] text-sidebar-foreground/60 truncate leading-tight">
               {currentUser?.email || 'No email provided'}

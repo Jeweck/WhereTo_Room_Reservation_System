@@ -23,13 +23,23 @@ export function useStore() {
 
   const loginWithEmail = (email: string, displayName?: string | null) => {
     const isAdmin = email.includes('admin');
-    let name = '';
+    let name = displayName || '';
     
-    if (displayName) {
-      name = displayName;
-    } else {
-      const emailName = email.split('@')[0].replace(/\d+/g, '').replace('admin', '') || 'GC User';
-      name = isAdmin ? 'Admin User' : (emailName.charAt(0).toUpperCase() + emailName.slice(1) || 'Student');
+    if (!name) {
+      const emailPrefix = email.split('@')[0];
+      // If the email is just a student ID (numbers only)
+      if (/^\d+$/.test(emailPrefix)) {
+        name = isAdmin ? 'Admin' : 'Gordon College Student';
+      } else {
+        // Clean up email prefix for names like "john.doe"
+        name = emailPrefix
+          .replace(/\d+/g, '') // Remove numbers
+          .replace('admin', '') // Remove admin tag
+          .split(/[._-]/)      // Split by common separators
+          .filter(Boolean)
+          .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(' ') || (isAdmin ? 'Admin User' : 'Gordon College User');
+      }
     }
 
     const user: User = {
