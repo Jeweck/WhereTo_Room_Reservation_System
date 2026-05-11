@@ -92,7 +92,7 @@ export default function LoginPage() {
       console.error("Google Sign-In Error:", error);
       toast({
         title: "Authentication Error",
-        description: error.message || "Failed to sign in with Google. Ensure the domain is authorized in Firebase Console.",
+        description: error.message || "Failed to sign in with Google. Ensure both port 6000 and 9002 domains are authorized in Firebase Console.",
         variant: "destructive"
       });
     } finally {
