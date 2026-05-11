@@ -5,8 +5,7 @@ import { getAuth, Auth } from 'firebase/auth';
 import { firebaseConfig } from './config';
 
 /**
- * Initializes Firebase services.
- * This should be called on the client side to avoid serialization issues.
+ * Initializes Firebase services safely for client-side usage.
  */
 export function initializeFirebase(): {
   firebaseApp: FirebaseApp;

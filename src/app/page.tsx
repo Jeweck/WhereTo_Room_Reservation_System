@@ -37,7 +37,7 @@ export default function LoginPage() {
 
     setLoading(true);
     
-    // Simulate network delay
+    // Simulate network delay for manual login
     setTimeout(() => {
       loginWithEmail(email);
       const isAdmin = email.includes('admin');
@@ -51,9 +51,18 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
-    if (!auth) return;
+    if (!auth) {
+      toast({
+        title: "Auth Error",
+        description: "Firebase Authentication is not initialized.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setLoading(true);
     const provider = new GoogleAuthProvider();
+    
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
@@ -71,7 +80,7 @@ export default function LoginPage() {
       }
 
       if (user.email) {
-        // Log in the user in our local store
+        // Log in the user in our local store for dashboard access
         loginWithEmail(user.email);
         toast({
           title: "Welcome to WhereTo",
@@ -80,10 +89,10 @@ export default function LoginPage() {
         router.push('/dashboard');
       }
     } catch (error: any) {
-      console.error(error);
+      console.error("Google Sign-In Error:", error);
       toast({
         title: "Authentication Error",
-        description: error.message || "Failed to sign in with Google.",
+        description: error.message || "Failed to sign in with Google. Ensure the domain is authorized in Firebase Console.",
         variant: "destructive"
       });
     } finally {
