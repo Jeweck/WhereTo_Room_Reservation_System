@@ -2,7 +2,7 @@
 import { Facility, Booking, User } from './types';
 
 export const MOCK_USERS: User[] = [
-  { id: 'u1', name: 'John Doe', email: 'john@academia.edu', role: 'user' },
+  { id: 'u1', name: 'John Doe', email: 'john@academia.edu', role: 'student' },
   { id: 'a1', name: 'Admin Jane', email: 'jane@admin.edu', role: 'admin' },
 ];
 
@@ -60,6 +60,7 @@ export const INITIAL_BOOKINGS: Booking[] = [
     facilityId: 'F001',
     userId: 'u1',
     userName: 'John Doe',
+    userRole: 'student',
     facilityName: 'Grand Auditorium',
     date: '2024-05-20',
     startTime: '10:00',
@@ -72,6 +73,7 @@ export const INITIAL_BOOKINGS: Booking[] = [
     facilityId: 'F002',
     userId: 'a1',
     userName: 'Admin Jane',
+    userRole: 'admin',
     facilityName: 'Executive Boardroom',
     date: '2024-05-21',
     startTime: '14:00',

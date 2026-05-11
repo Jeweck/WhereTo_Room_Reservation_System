@@ -74,6 +74,7 @@ export default function FacilitiesPage() {
       facilityId: selectedFacility.id,
       userId: currentUser?.id || 'guest',
       userName: currentUser?.name || 'Guest',
+      userRole: currentUser?.role || 'student',
       facilityName: selectedFacility.name,
       date,
       startTime,

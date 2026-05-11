@@ -77,7 +77,12 @@ export default function AdminPage() {
                             </Badge>
                           </div>
                           <div className="flex flex-col text-sm text-muted-foreground">
-                            <span className="font-medium text-primary">Requested by: {booking.userName}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-primary">Requested by: {booking.userName}</span>
+                              <Badge variant="outline" className="text-[10px] h-5 px-2 uppercase font-bold border-secondary/50 text-secondary bg-secondary/5">
+                                {booking.userRole}
+                              </Badge>
+                            </div>
                             <div className="flex items-center gap-2 mt-1">
                               <Clock className="w-3 h-3" />
                               <span>{booking.date} | {booking.startTime} - {booking.endTime}</span>
@@ -142,8 +147,12 @@ export default function AdminPage() {
                               {booking.status.toUpperCase()}
                             </Badge>
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            <span>{booking.userName} • {booking.date} • {booking.startTime} - {booking.endTime}</span>
+                          <div className="text-sm text-muted-foreground flex items-center gap-2">
+                            <span>{booking.userName}</span>
+                            <Badge variant="outline" className="text-[9px] h-4 px-1.5 uppercase font-bold opacity-70">
+                              {booking.userRole}
+                            </Badge>
+                            <span>• {booking.date} • {booking.startTime} - {booking.endTime}</span>
                           </div>
                         </div>
                         {booking.status === 'pending' && (

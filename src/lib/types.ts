@@ -23,6 +23,7 @@ export interface Booking {
   facilityId: string;
   userId: string;
   userName: string;
+  userRole: Role;
   facilityName: string;
   date: string;
   startTime: string;
