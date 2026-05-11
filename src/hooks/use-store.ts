@@ -22,7 +22,6 @@ export function useStore() {
   }, []);
 
   const loginWithEmail = (email: string, displayName?: string | null) => {
-    // Role logic: Check for "ADMIN" in the email prefix
     const emailPrefix = email.split('@')[0].toUpperCase();
     const isAdmin = emailPrefix.includes('ADMIN');
     const role: Role = isAdmin ? 'admin' : 'student';
@@ -30,15 +29,13 @@ export function useStore() {
     let name = displayName || '';
     
     if (!name) {
-      // If the email is just a student ID (numbers only)
       if (/^\d+$/.test(emailPrefix.replace('ADMIN', ''))) {
         name = isAdmin ? 'Administrator' : 'Gordon College Student';
       } else {
-        // Clean up email prefix for names like "john.doe"
         name = emailPrefix
-          .replace(/\d+/g, '') // Remove numbers
-          .replace('ADMIN', '') // Remove admin tag
-          .split(/[._-]/)      // Split by common separators
+          .replace(/\d+/g, '')
+          .replace('ADMIN', '')
+          .split(/[._-]/)
           .filter(Boolean)
           .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
           .join(' ') || (isAdmin ? 'Admin User' : 'Gordon College User');
@@ -78,6 +75,11 @@ export function useStore() {
     localStorage.setItem('whereto_bookings', JSON.stringify(newBookings));
   };
 
+  const clearAllBookings = () => {
+    setBookings([]);
+    localStorage.setItem('whereto_bookings', JSON.stringify([]));
+  };
+
   const upsertFacility = (facility: Facility) => {
     const exists = facilities.find(f => f.id === facility.id);
     let newFacilities;
@@ -105,6 +107,7 @@ export function useStore() {
     addBooking,
     cancelBooking,
     approveBooking,
+    clearAllBookings,
     upsertFacility,
     deleteFacility
   };

@@ -11,14 +11,26 @@ import {
   XCircle,
   Clock,
   CalendarDays,
-  Inbox
+  Inbox,
+  Trash2
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function AdminPage() {
-  const { bookings, currentUser, approveBooking, cancelBooking } = useStore();
+  const { bookings, currentUser, approveBooking, cancelBooking, clearAllBookings } = useStore();
 
   const pendingBookings = bookings.filter(b => b.status === 'pending');
   const allBookings = bookings;
@@ -32,6 +44,14 @@ export default function AdminPage() {
       </div>
     );
   }
+
+  const handleClearAll = () => {
+    clearAllBookings();
+    toast({
+      title: "Records Cleared",
+      description: "All reservation records have been permanently removed.",
+    });
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -124,9 +144,35 @@ export default function AdminPage() {
         </TabsContent>
 
         <TabsContent value="history" className="space-y-6">
+          {allBookings.length > 0 && (
+            <div className="flex justify-end px-1">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10 border-destructive/20 font-semibold">
+                    <Trash2 className="w-4 h-4 mr-2" /> Clear All Records
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete all reservation history and records from the system.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleClearAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Clear Records
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
+          
           <div className="grid grid-cols-1 gap-4">
             {allBookings.length === 0 ? (
-              <div className="py-20 text-center text-muted-foreground">
+              <div className="py-20 text-center text-muted-foreground bg-white rounded-xl border border-dashed">
                 <CalendarDays className="w-12 h-12 mx-auto mb-4 opacity-10" />
                 <p>No booking records found.</p>
               </div>
@@ -147,12 +193,14 @@ export default function AdminPage() {
                               {booking.status.toUpperCase()}
                             </Badge>
                           </div>
-                          <div className="text-sm text-muted-foreground flex items-center gap-2">
-                            <span>{booking.userName}</span>
-                            <Badge variant="outline" className="text-[9px] h-4 px-1.5 uppercase font-bold opacity-70">
-                              {booking.userRole}
-                            </Badge>
-                            <span>• {booking.date} • {booking.startTime} - {booking.endTime}</span>
+                          <div className="text-sm text-muted-foreground flex flex-col gap-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-foreground">{booking.userName}</span>
+                              <Badge variant="outline" className="text-[9px] h-4 px-1.5 uppercase font-bold opacity-70">
+                                {booking.userRole}
+                              </Badge>
+                            </div>
+                            <span>{booking.date} • {booking.startTime} - {booking.endTime}</span>
                           </div>
                         </div>
                         {booking.status === 'pending' && (
