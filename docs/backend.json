@@ -53,15 +53,15 @@
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/backend/entities/User" },
-      "description": "User profiles. Rules updated to allow prototype access."
+      "description": "User profiles. Prototype access granted."
     },
     "/facilities/{facilityId}": {
       "schema": { "$ref": "#/backend/entities/Facility" },
-      "description": "List of campus facilities. Rules updated to allow prototype access."
+      "description": "List of campus facilities. Prototype access granted."
     },
     "/bookings/{bookingId}": {
       "schema": { "$ref": "#/backend/entities/Booking" },
-      "description": "Facility reservation records. Rules updated to allow prototype access."
+      "description": "Facility reservation records. Prototype access granted."
     }
   }
 }

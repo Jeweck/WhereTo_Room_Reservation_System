@@ -1,20 +1,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Gordon College Facility Reservation System - Prototype Rules
+    // Gordon College Facility Reservation System - Open Prototype Rules
+    // This allows full access to all collections to facilitate development.
     
-    // Allow public read and write access for all collections to ensure the prototype works 
-    // without authentication hurdles during initial development.
-    
-    match /facilities/{facilityId} {
-      allow read, write: if true;
-    }
-    
-    match /bookings/{bookingId} {
-      allow read, write: if true;
-    }
-    
-    match /users/{userId} {
+    match /{document=**} {
       allow read, write: if true;
     }
   }
