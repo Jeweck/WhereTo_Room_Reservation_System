@@ -1,0 +1,68 @@
+
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a user in the system.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin", "student"] }
+      },
+      "required": ["id", "name", "email", "role"]
+    },
+    "Facility": {
+      "title": "Facility",
+      "description": "A bookable campus facility.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "capacity": { "type": "number" },
+        "equipment": { "type": "array", "items": { "type": "string" } },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "purpose": { "type": "string" }
+      },
+      "required": ["id", "name", "capacity", "equipment", "description", "imageUrl", "purpose"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "A reservation for a facility.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "facilityId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userRole": { "type": "string", "enum": ["admin", "student"] },
+        "facilityName": { "type": "string" },
+        "date": { "type": "string" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "purpose": { "type": "string" },
+        "status": { "type": "string", "enum": ["confirmed", "pending", "cancelled"] }
+      },
+      "required": ["id", "facilityId", "userId", "userName", "userRole", "facilityName", "date", "startTime", "endTime", "purpose", "status"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com", "password"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles."
+    },
+    "/facilities/{facilityId}": {
+      "schema": { "$ref": "#/entities/Facility" },
+      "description": "List of campus facilities."
+    },
+    "/bookings/{bookingId}": {
+      "schema": { "$ref": "#/entities/Booking" },
+      "description": "Facility reservation records."
+    }
+  }
+}

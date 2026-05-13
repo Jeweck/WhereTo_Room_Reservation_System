@@ -3,22 +3,44 @@
 
 import { useState, useEffect } from 'react';
 import { User, Facility, Booking, Role } from '@/lib/types';
-import { INITIAL_FACILITIES, INITIAL_BOOKINGS } from '@/lib/mock-data';
+import { INITIAL_FACILITIES } from '@/lib/mock-data';
+import { 
+  useFirestore, 
+  useAuth, 
+  useCollection, 
+  useDoc 
+} from '@/firebase';
+import { 
+  doc, 
+  setDoc, 
+  updateDoc, 
+  deleteDoc, 
+  collection, 
+  query, 
+  where,
+  writeBatch
+} from 'firebase/firestore';
 
 export function useStore() {
+  const db = useFirestore();
+  const auth = useAuth();
+  
+  // Local state for the current logged-in user
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [facilities, setFacilities] = useState<Facility[]>(INITIAL_FACILITIES);
-  const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
+
+  // Sync Facilities from Firestore
+  const facilitiesQuery = db ? collection(db, 'facilities') : null;
+  const { data: facilitiesData } = useCollection<Facility>(facilitiesQuery);
+  const facilities = facilitiesData || INITIAL_FACILITIES;
+
+  // Sync Bookings from Firestore
+  const bookingsQuery = db ? collection(db, 'bookings') : null;
+  const { data: bookingsData } = useCollection<Booking>(bookingsQuery);
+  const bookings = bookingsData || [];
 
   useEffect(() => {
     const savedUser = localStorage.getItem('whereto_user');
     if (savedUser) setCurrentUser(JSON.parse(savedUser));
-    
-    const savedFacilities = localStorage.getItem('whereto_facilities');
-    if (savedFacilities) setFacilities(JSON.parse(savedFacilities));
-
-    const savedBookings = localStorage.getItem('whereto_bookings');
-    if (savedBookings) setBookings(JSON.parse(savedBookings));
   }, []);
 
   const loginWithEmail = (email: string, displayName?: string | null) => {
@@ -43,60 +65,69 @@ export function useStore() {
     }
 
     const user: User = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: auth?.currentUser?.uid || Math.random().toString(36).substr(2, 9),
       name,
       email,
       role
     };
+
     setCurrentUser(user);
     localStorage.setItem('whereto_user', JSON.stringify(user));
+    
+    // Also save user profile to Firestore
+    if (db && user.id) {
+      setDoc(doc(db, 'users', user.id), user, { merge: true });
+    }
   };
 
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('whereto_user');
+    auth?.signOut();
   };
 
   const addBooking = (booking: Booking) => {
-    const newBookings = [...bookings, booking];
-    setBookings(newBookings);
-    localStorage.setItem('whereto_bookings', JSON.stringify(newBookings));
+    if (!db) return;
+    setDoc(doc(db, 'bookings', booking.id), booking);
   };
 
   const cancelBooking = (id: string) => {
-    const newBookings = bookings.map(b => b.id === id ? { ...b, status: 'cancelled' as const } : b);
-    setBookings(newBookings);
-    localStorage.setItem('whereto_bookings', JSON.stringify(newBookings));
+    if (!db) return;
+    updateDoc(doc(db, 'bookings', id), { status: 'cancelled' });
   };
 
   const approveBooking = (id: string) => {
-    const newBookings = bookings.map(b => b.id === id ? { ...b, status: 'confirmed' as const } : b);
-    setBookings(newBookings);
-    localStorage.setItem('whereto_bookings', JSON.stringify(newBookings));
+    if (!db) return;
+    updateDoc(doc(db, 'bookings', id), { status: 'confirmed' });
   };
 
-  const clearAllBookings = () => {
-    setBookings([]);
-    localStorage.setItem('whereto_bookings', JSON.stringify([]));
+  const clearAllBookings = async () => {
+    if (!db || !bookings.length) return;
+    const batch = writeBatch(db);
+    bookings.forEach((b) => {
+      batch.delete(doc(db, 'bookings', b.id));
+    });
+    await batch.commit();
   };
 
   const upsertFacility = (facility: Facility) => {
-    const exists = facilities.find(f => f.id === facility.id);
-    let newFacilities;
-    if (exists) {
-      newFacilities = facilities.map(f => f.id === facility.id ? facility : f);
-    } else {
-      newFacilities = [...facilities, facility];
-    }
-    setFacilities(newFacilities);
-    localStorage.setItem('whereto_facilities', JSON.stringify(newFacilities));
+    if (!db) return;
+    setDoc(doc(db, 'facilities', facility.id), facility, { merge: true });
   };
 
   const deleteFacility = (id: string) => {
-    const newFacilities = facilities.filter(f => f.id !== id);
-    setFacilities(newFacilities);
-    localStorage.setItem('whereto_facilities', JSON.stringify(newFacilities));
+    if (!db) return;
+    deleteDoc(doc(db, 'facilities', id));
   };
+
+  // One-time initialization to seed facilities if collection is empty
+  useEffect(() => {
+    if (db && facilitiesData?.length === 0) {
+      INITIAL_FACILITIES.forEach(f => {
+        setDoc(doc(db, 'facilities', f.id), f);
+      });
+    }
+  }, [db, facilitiesData]);
 
   return {
     currentUser,
