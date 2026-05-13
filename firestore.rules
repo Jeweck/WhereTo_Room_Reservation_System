@@ -1,25 +1,20 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Gordon College Facility Reservation System Rules
+    // Gordon College Facility Reservation System - Prototype Rules
     
-    // Allow public read for facilities and bookings so the dashboard and browse pages load immediately
+    // Allow public read and write access for all collections to ensure the prototype works 
+    // without authentication hurdles during initial development.
+    
     match /facilities/{facilityId} {
-      allow read: if true;
-      // In a prototype, we allow writes to help seed data, but in production this would be isAdmin()
-      allow write: if true;
+      allow read, write: if true;
     }
     
     match /bookings/{bookingId} {
-      allow read: if true;
-      // Allow creation of bookings for any user to test the flow
-      allow create: if true;
-      // Allow updates/deletes for the booking owner or admins
-      allow update, delete: if true;
+      allow read, write: if true;
     }
     
     match /users/{userId} {
-      // Allow reading and writing user profiles so the login flow works without full Auth
       allow read, write: if true;
     }
   }
