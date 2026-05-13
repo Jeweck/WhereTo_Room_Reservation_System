@@ -77,16 +77,16 @@ export function Sidebar() {
               "flex items-center rounded-lg transition-all duration-200 group relative overflow-hidden",
               isHovered ? "px-4 py-3 gap-3" : "p-3 justify-center",
               pathname === item.href 
-                ? "bg-secondary text-secondary-foreground" 
+                ? "bg-white text-primary shadow-lg" 
                 : "hover:bg-sidebar-accent/50 text-sidebar-foreground/70 hover:text-sidebar-foreground"
             )}
           >
             <item.icon className={cn(
               "w-6 h-6 flex-shrink-0 transition-colors",
-              pathname === item.href ? "text-secondary-foreground" : "text-sidebar-foreground/40 group-hover:text-sidebar-foreground/70"
+              pathname === item.href ? "text-primary" : "text-sidebar-foreground/40 group-hover:text-sidebar-foreground/70"
             )} />
             <span className={cn(
-              "font-medium whitespace-nowrap transition-all duration-300",
+              "font-semibold whitespace-nowrap transition-all duration-300",
               isHovered ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 absolute"
             )}>
               {item.label}
