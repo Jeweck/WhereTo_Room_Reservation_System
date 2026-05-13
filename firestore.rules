@@ -3,7 +3,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Wide open rules for unblocked prototype development.
-    // These will allow all read and write operations from any source.
+    // This allows all read and write operations from any source.
+    // Forced redeploy triggered for bookings creation.
     match /{document=**} {
       allow read, write: if true;
     }
