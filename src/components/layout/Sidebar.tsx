@@ -48,33 +48,33 @@ export function Sidebar() {
   return (
     <div 
       className={cn(
-        "flex flex-col h-full bg-sidebar text-sidebar-foreground fixed left-0 top-0 z-50 transition-all duration-300 ease-in-out border-r border-sidebar-border overflow-hidden shadow-2xl",
+        "flex flex-col h-full bg-sidebar text-sidebar-foreground fixed left-0 top-0 z-50 transition-all duration-300 ease-in-out border-r border-sidebar-border overflow-x-hidden shadow-2xl",
         isHovered ? "w-64" : "w-20"
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Branding Area */}
-      <div className="p-5 flex items-center gap-3 h-20 flex-shrink-0">
+      <div className="p-5 flex items-center gap-3 h-20 flex-shrink-0 overflow-hidden">
         <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
           <MapPin className="text-secondary-foreground w-6 h-6" />
         </div>
         <span className={cn(
           "font-headline font-bold text-xl tracking-tight text-white whitespace-nowrap transition-all duration-300",
-          isHovered ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 pointer-events-none"
+          isHovered ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 pointer-events-none absolute"
         )}>
           WhereTo
         </span>
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto scrollbar-hide">
+      <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto overflow-x-hidden scrollbar-hide">
         {menuItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             className={cn(
-              "flex items-center rounded-lg transition-all duration-200 group relative",
+              "flex items-center rounded-lg transition-all duration-200 group relative overflow-hidden",
               isHovered ? "px-4 py-3 gap-3" : "p-3 justify-center",
               pathname === item.href 
                 ? "bg-secondary text-secondary-foreground" 
@@ -103,9 +103,9 @@ export function Sidebar() {
       </nav>
 
       {/* User & Sign Out Area */}
-      <div className="p-3 border-t border-sidebar-border/50 bg-sidebar-accent/20">
+      <div className="p-3 border-t border-sidebar-border/50 bg-sidebar-accent/20 overflow-hidden">
         <div className={cn(
-          "flex items-center gap-3 p-2 mb-2 rounded-lg bg-sidebar-accent/30 overflow-hidden transition-all duration-300",
+          "flex items-center gap-3 p-2 mb-2 rounded-lg bg-sidebar-accent/30 overflow-hidden transition-all duration-300 relative",
           isHovered ? "w-full" : "w-10 h-10 p-0 rounded-full justify-center"
         )}>
           <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold uppercase text-secondary-foreground flex-shrink-0 shadow-sm border border-white/10">
@@ -127,7 +127,7 @@ export function Sidebar() {
         <Button 
           variant="ghost" 
           className={cn(
-            "w-full transition-all duration-200 text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 group h-10",
+            "w-full transition-all duration-200 text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 group h-10 overflow-hidden",
             isHovered ? "justify-start px-3" : "justify-center p-0"
           )}
           onClick={() => {
