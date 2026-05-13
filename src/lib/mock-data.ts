@@ -1,10 +1,5 @@
 
-import { Facility, Booking, User } from './types';
-
-export const MOCK_USERS: User[] = [
-  { id: 'u1', name: 'John Doe', email: 'john@academia.edu', role: 'student' },
-  { id: 'a1', name: 'Admin Jane', email: 'jane@admin.edu', role: 'admin' },
-];
+import { Facility, Booking } from './types';
 
 export const INITIAL_FACILITIES: Facility[] = [
   // Classrooms

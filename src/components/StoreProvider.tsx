@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
@@ -58,7 +59,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Seed initial data once
+  // Seed initial data once if collection is empty
   useEffect(() => {
     if (db && !fLoading && facilitiesData?.length === 0) {
       INITIAL_FACILITIES.forEach(f => {
@@ -106,7 +107,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const bookingRef = doc(db, 'bookings', booking.id);
     setDoc(bookingRef, {
       ...booking,
-      createdAt: serverTimestamp() // Add server side timestamp for sorting
+      createdAt: serverTimestamp()
     }).catch(async () => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: bookingRef.path,

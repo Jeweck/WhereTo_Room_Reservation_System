@@ -11,6 +11,7 @@ import { z } from 'genkit';
 
 /**
  * Mock facility data aligned with the latest school inventory.
+ * In a production app, this would be fetched from Firestore.
  */
 const MOCK_FACILITIES = [
   { id: 'R101', name: 'Room 101', capacity: 40, equipment: ['Whiteboard', 'Smart TV', 'Wi-Fi'], purpose: 'Classroom' },
