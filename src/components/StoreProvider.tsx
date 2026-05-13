@@ -1,11 +1,10 @@
-
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { User, Facility, Booking, Role } from '@/lib/types';
 import { INITIAL_FACILITIES } from '@/lib/mock-data';
 import { useFirestore, useAuth, useCollection } from '@/firebase';
-import { doc, setDoc, updateDoc, deleteDoc, collection, writeBatch } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, deleteDoc, collection, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -32,14 +31,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  // Queries are memoized at the top level to prevent re-subscriptions and assertion errors.
+  // Stabilize query references using useMemo
   const facilitiesRef = useMemo(() => (db ? collection(db, 'facilities') : null), [db]);
   const bookingsRef = useMemo(() => (db ? collection(db, 'bookings') : null), [db]);
 
   const { data: facilitiesData, loading: fLoading } = useCollection<Facility>(facilitiesRef);
   const { data: bookingsData, loading: bLoading } = useCollection<Booking>(bookingsRef);
 
-  // Fallback to initial mock data only if firestore has finished loading and is empty.
+  // Hydrate facilities with mock data if Firestore is empty
   const facilities = useMemo(() => {
     if (!fLoading && facilitiesData && facilitiesData.length > 0) return facilitiesData;
     return INITIAL_FACILITIES;
@@ -47,6 +46,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const bookings = useMemo(() => bookingsData || [], [bookingsData]);
 
+  // Load user from local storage on mount
   useEffect(() => {
     const savedUser = localStorage.getItem('whereto_user');
     if (savedUser) {
@@ -58,7 +58,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Seeding initial facilities if the collection is truly empty after loading.
+  // Seed initial data once
   useEffect(() => {
     if (db && !fLoading && facilitiesData?.length === 0) {
       INITIAL_FACILITIES.forEach(f => {
@@ -68,7 +68,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, [db, facilitiesData, fLoading]);
 
-  const loginWithEmail = (email: string, displayName?: string | null) => {
+  const loginWithEmail = useCallback((email: string, displayName?: string | null) => {
     const emailPrefix = email.split('@')[0].toUpperCase();
     const isAdmin = emailPrefix.includes('ADMIN');
     const role: Role = isAdmin ? 'admin' : 'student';
@@ -85,7 +85,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     
     if (db) {
       const userRef = doc(db, 'users', user.id);
-      setDoc(userRef, user, { merge: true }).catch(() => {
+      setDoc(userRef, user, { merge: true }).catch(async () => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
           path: userRef.path,
           operation: 'write',
@@ -93,92 +93,104 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         }));
       });
     }
-  };
+  }, [db, auth]);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setCurrentUser(null);
     localStorage.removeItem('whereto_user');
     auth?.signOut().catch(() => {});
-  };
+  }, [auth]);
 
-  const addBooking = (booking: Booking) => {
+  const addBooking = useCallback((booking: Booking) => {
     if (!db) return;
     const bookingRef = doc(db, 'bookings', booking.id);
-    setDoc(bookingRef, booking).catch(() => {
+    setDoc(bookingRef, {
+      ...booking,
+      createdAt: serverTimestamp() // Add server side timestamp for sorting
+    }).catch(async () => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: bookingRef.path,
         operation: 'create',
         requestResourceData: booking
       }));
     });
-  };
+  }, [db]);
 
-  const cancelBooking = (id: string) => {
+  const cancelBooking = useCallback((id: string) => {
     if (!db) return;
     const bookingRef = doc(db, 'bookings', id);
-    updateDoc(bookingRef, { status: 'cancelled' }).catch(() => {
+    updateDoc(bookingRef, { status: 'cancelled' }).catch(async () => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: bookingRef.path,
         operation: 'update',
         requestResourceData: { status: 'cancelled' }
       }));
     });
-  };
+  }, [db]);
 
-  const approveBooking = (id: string) => {
+  const approveBooking = useCallback((id: string) => {
     if (!db) return;
     const bookingRef = doc(db, 'bookings', id);
-    updateDoc(bookingRef, { status: 'confirmed' }).catch(() => {
+    updateDoc(bookingRef, { status: 'confirmed' }).catch(async () => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: bookingRef.path,
         operation: 'update',
         requestResourceData: { status: 'confirmed' }
       }));
     });
-  };
+  }, [db]);
 
-  const clearAllBookings = () => {
+  const clearAllBookings = useCallback(() => {
     if (!db || !bookings.length) return;
     const batch = writeBatch(db);
     bookings.forEach((b) => {
       batch.delete(doc(db, 'bookings', b.id));
     });
-    batch.commit().catch(() => {
+    batch.commit().catch(async () => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: '/bookings',
         operation: 'delete'
       }));
     });
-  };
+  }, [db, bookings]);
 
-  const upsertFacility = (facility: Facility) => {
+  const upsertFacility = useCallback((facility: Facility) => {
     if (!db) return;
     const facilityRef = doc(db, 'facilities', facility.id);
-    setDoc(facilityRef, facility, { merge: true }).catch(() => {
+    setDoc(facilityRef, facility, { merge: true }).catch(async () => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: facilityRef.path,
         operation: 'write',
         requestResourceData: facility
       }));
     });
-  };
+  }, [db]);
 
-  const deleteFacility = (id: string) => {
+  const deleteFacility = useCallback((id: string) => {
     if (!db) return;
     const facilityRef = doc(db, 'facilities', id);
-    deleteDoc(facilityRef).catch(() => {
+    deleteDoc(facilityRef).catch(async () => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: facilityRef.path,
         operation: 'delete'
       }));
     });
-  };
+  }, [db]);
 
   const value = useMemo(() => ({
-    currentUser, facilities, bookings, loading: fLoading || bLoading,
-    loginWithEmail, logout, addBooking, cancelBooking, approveBooking,
-    clearAllBookings, upsertFacility, deleteFacility
-  }), [currentUser, facilities, bookings, fLoading, bLoading]);
+    currentUser, 
+    facilities, 
+    bookings, 
+    loading: fLoading || bLoading,
+    loginWithEmail, 
+    logout, 
+    addBooking, 
+    cancelBooking, 
+    approveBooking,
+    clearAllBookings, 
+    upsertFacility, 
+    deleteFacility
+  }), [currentUser, facilities, bookings, fLoading, bLoading, loginWithEmail, logout, addBooking, cancelBooking, approveBooking, clearAllBookings, upsertFacility, deleteFacility]);
 
   return (
     <StoreContext.Provider value={value}>

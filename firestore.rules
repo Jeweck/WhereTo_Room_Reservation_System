@@ -1,10 +1,8 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // SECURITY WARNING: These rules are for prototype development only.
-    // They allow ANYONE to read and write to your database.
-    // Sync Version: 1.0.8 (Forced Redeploy)
+    // Prototype Mode: Full open access for development.
+    // Sync Version: 1.0.9 (Forced Redeploy)
     match /{document=**} {
       allow read, write: if true;
     }
