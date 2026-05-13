@@ -61,7 +61,7 @@
     },
     "/bookings/{bookingId}": {
       "schema": { "$ref": "#/backend/entities/Booking" },
-      "description": "Facility reservation records. Schedule is publicly readable."
+      "description": "Facility reservation records. Schedule is publicly readable for all users."
     }
   }
 }
