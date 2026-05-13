@@ -24,16 +24,21 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Bookings: Users can manage their own reservations.
-    // Administrators can manage all reservations.
+    // Bookings: All authenticated users can read/list to see the schedule.
+    // Managing specific records is restricted to owners or admins.
     match /bookings/{bookingId} {
-      // Allow read/update if the user owns the booking or is an admin
-      allow read, update: if isSignedIn() && (
+      // Allow list and get for all signed-in users to see the campus schedule
+      allow read: if isSignedIn();
+      
+      // Allow update if the user owns the booking or is an admin
+      allow update: if isSignedIn() && (
         (resource != null && resource.data.userId == request.auth.uid) || 
         isAdmin()
       );
+      
       // Allow creation for any signed-in user
       allow create: if isSignedIn();
+      
       // Only admins can delete records
       allow delete: if isAdmin();
     }

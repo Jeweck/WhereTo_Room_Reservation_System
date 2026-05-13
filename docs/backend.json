@@ -29,7 +29,7 @@
     },
     "Booking": {
       "title": "Booking",
-      "description": "A reservation for a facility.",
+      "description": "A reservation for a facility. Users can view all bookings to check availability.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -61,7 +61,7 @@
     },
     "/bookings/{bookingId}": {
       "schema": { "$ref": "#/entities/Booking" },
-      "description": "Facility reservation records."
+      "description": "Facility reservation records. All authenticated users can read to see the schedule."
     }
   }
 }
