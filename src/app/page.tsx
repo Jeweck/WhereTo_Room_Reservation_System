@@ -92,14 +92,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-4">
       <div className="mb-8 text-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-700">
-        <div className="w-20 h-20 bg-primary rounded-2xl mx-auto flex items-center justify-center shadow-xl shadow-primary/20">
-          <MapPin className="w-12 h-12 text-white" />
+        <div className="w-20 h-20 bg-white rounded-2xl mx-auto flex items-center justify-center shadow-2xl border-4 border-white">
+          <MapPin className="w-12 h-12 text-primary" strokeWidth={2.5} />
         </div>
         <div>
-          <h1 className="text-4xl font-headline font-bold text-primary tracking-tight">WhereTo</h1>
-          <p className="text-muted-foreground mt-2 max-w-xs mx-auto">Campus facility management & intelligent scheduling for Gordon College.</p>
+          <h1 className="text-4xl font-headline font-bold text-white tracking-tight">WhereTo</h1>
+          <p className="text-white/80 mt-2 max-w-xs mx-auto">Campus facility management & intelligent scheduling for Gordon College.</p>
         </div>
       </div>
 
@@ -207,7 +207,7 @@ export default function LoginPage() {
         </CardFooter>
       </Card>
 
-      <p className="mt-8 text-sm text-muted-foreground/60">
+      <p className="mt-8 text-sm text-white/40">
         &copy; 2024 WhereTo Systems. All rights reserved.
       </p>
     </div>
