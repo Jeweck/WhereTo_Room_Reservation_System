@@ -7,8 +7,10 @@ service cloud.firestore {
     }
 
     // Helper function to check if the user has an admin email
+    // Matches emails like 202411452ADMIN@gordoncollege.edu.ph
     function isAdmin() {
-      return isSignedIn() && request.auth.token.email.lower().matches('.*admin.*@gordoncollege\\.edu\\.ph');
+      return isSignedIn() && 
+             request.auth.token.email.lower().matches('.*admin.*@gordoncollege\\.edu\\.ph');
     }
 
     // User profiles: Users can read and write their own profile
@@ -28,14 +30,14 @@ service cloud.firestore {
       // Allow list and get for all users to see the campus schedule
       allow read: if true;
       
+      // Allow creation for any signed-in user
+      allow create: if isSignedIn();
+      
       // Allow update if the user owns the booking or is an admin
       allow update: if isSignedIn() && (
         (resource != null && resource.data.userId == request.auth.uid) || 
         isAdmin()
       );
-      
-      // Allow creation for any signed-in user
-      allow create: if isSignedIn();
       
       // Only admins can delete records
       allow delete: if isAdmin();
