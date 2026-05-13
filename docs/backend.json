@@ -53,15 +53,15 @@
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/backend/entities/User" },
-      "description": "User profiles managed by the owner or administrators."
+      "description": "User profiles managed by the owner or administrators. Rules now allow initial prototype flow."
     },
     "/facilities/{facilityId}": {
       "schema": { "$ref": "#/backend/entities/Facility" },
-      "description": "List of campus facilities accessible to all, managed by admins."
+      "description": "List of campus facilities accessible to all, managed by admins. Rules now allow initial prototype flow."
     },
     "/bookings/{bookingId}": {
       "schema": { "$ref": "#/backend/entities/Booking" },
-      "description": "Facility reservation records. Schedule is publicly readable for all users to check availability."
+      "description": "Facility reservation records. Schedule is publicly readable for all users to check availability. Rules now allow initial prototype flow."
     }
   }
 }

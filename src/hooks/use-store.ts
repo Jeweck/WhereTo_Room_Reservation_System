@@ -15,7 +15,8 @@ import {
   updateDoc, 
   deleteDoc, 
   collection, 
-  writeBatch
+  writeBatch,
+  query
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -26,12 +27,14 @@ export function useStore() {
   
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  // Memoize queries to prevent infinite re-subscription loops and SDK assertion errors
-  const facilitiesQuery = useMemo(() => (db ? collection(db, 'facilities') : null), [db]);
+  // Use absolute stability for queries to prevent Firestore assertion failures
+  const facilitiesRef = useMemo(() => (db ? collection(db, 'facilities') : null), [db]);
+  const facilitiesQuery = useMemo(() => (facilitiesRef ? query(facilitiesRef) : null), [facilitiesRef]);
   const { data: facilitiesData } = useCollection<Facility>(facilitiesQuery);
-  const facilities = facilitiesData || INITIAL_FACILITIES;
+  const facilities = facilitiesData && facilitiesData.length > 0 ? facilitiesData : INITIAL_FACILITIES;
 
-  const bookingsQuery = useMemo(() => (db ? collection(db, 'bookings') : null), [db]);
+  const bookingsRef = useMemo(() => (db ? collection(db, 'bookings') : null), [db]);
+  const bookingsQuery = useMemo(() => (bookingsRef ? query(bookingsRef) : null), [bookingsRef]);
   const { data: bookingsData } = useCollection<Booking>(bookingsQuery);
   const bookings = bookingsData || [];
 
@@ -62,7 +65,7 @@ export function useStore() {
     }
 
     const user: User = {
-      id: auth?.currentUser?.uid || Math.random().toString(36).substr(2, 9),
+      id: auth?.currentUser?.uid || `user_${Math.random().toString(36).substr(2, 9)}`,
       name,
       email,
       role
