@@ -9,47 +9,65 @@ export const MOCK_USERS: User[] = [
 export const INITIAL_FACILITIES: Facility[] = [
   {
     id: 'F001',
-    name: 'Grand Auditorium',
-    capacity: 250,
-    equipment: ['Projector', 'Surround Sound', 'Stage Lighting', 'Microphones'],
-    description: 'Our largest venue for prestigious events and massive lectures.',
-    imageUrl: 'https://picsum.photos/seed/aud/800/600',
-    purpose: 'Events'
+    name: 'Main Theater',
+    capacity: 500,
+    equipment: ['Professional Sound System', 'Stage Lighting', '4K Projector', 'Retractable Screen'],
+    description: 'The premier venue for performances, major seminars, and campus-wide events.',
+    imageUrl: 'https://picsum.photos/seed/theater1/800/600',
+    purpose: 'Theater'
   },
   {
     id: 'F002',
-    name: 'Executive Boardroom',
-    capacity: 20,
-    equipment: ['4K Monitor', 'Video Conferencing', 'Whiteboard'],
-    description: 'Quiet, professional environment for important decisions.',
-    imageUrl: 'https://picsum.photos/seed/conf/800/600',
-    purpose: 'Meetings'
+    name: 'Advanced Computing Lab',
+    capacity: 35,
+    equipment: ['RTX 4090 Workstations', 'Dual Monitors', 'Fiber Internet'],
+    description: 'Specialized lab for AI development, graphic design, and cybersecurity research.',
+    imageUrl: 'https://picsum.photos/seed/complab/800/600',
+    purpose: 'Computer Lab'
   },
   {
     id: 'F003',
-    name: 'Cybersecurity Lab',
+    name: 'Standard Classroom 201',
     capacity: 45,
-    equipment: ['High-end PCs', 'Server Access', 'Fiber Internet'],
-    description: 'Cutting-edge technology lab for engineering and CS students.',
-    imageUrl: 'https://picsum.photos/seed/lab/800/600',
-    purpose: 'Laboratory'
+    equipment: ['Whiteboard', 'Smart TV', 'Wi-Fi'],
+    description: 'Standard medium-sized classroom suitable for daily lectures and group discussions.',
+    imageUrl: 'https://picsum.photos/seed/class201/800/600',
+    purpose: 'Classroom'
   },
   {
     id: 'F004',
-    name: 'Zen Study Suite',
-    capacity: 8,
-    equipment: ['Whiteboard', 'Coffee Machine'],
-    description: 'Perfect for deep-focus group sessions.',
-    imageUrl: 'https://picsum.photos/seed/study/800/600',
-    purpose: 'Study'
+    name: 'Multipurpose PE Hall',
+    capacity: 300,
+    equipment: ['Basketball Hoops', 'Volleyball Nets', 'Public Address System'],
+    description: 'Large open hall for sports activities, physical education classes, and physical events.',
+    imageUrl: 'https://picsum.photos/seed/pehall/800/600',
+    purpose: 'PE Hall'
   },
   {
     id: 'F005',
-    name: 'General Lecture Hall 101',
-    capacity: 100,
-    equipment: ['Projector', 'Sound System'],
-    description: 'Standard large-format classroom for undergraduate courses.',
-    imageUrl: 'https://picsum.photos/seed/class/800/600',
+    name: 'Cybersecurity Lab',
+    capacity: 40,
+    equipment: ['Linux Servers', 'Hardware Firewalls', 'Networking Gear'],
+    description: 'Dedicated space for hands-on networking and security training.',
+    imageUrl: 'https://picsum.photos/seed/cyberlab/800/600',
+    purpose: 'Computer Lab'
+  },
+  {
+    id: 'F006',
+    name: 'Mini Theater 102',
+    capacity: 80,
+    equipment: ['Surround Sound', 'Comfortable Seating', 'HD Projector'],
+    description: 'Intimate theater space for smaller presentations and film screenings.',
+    imageUrl: 'https://picsum.photos/seed/minitheater/800/600',
+    purpose: 'Theater'
+  },
+  {
+    id: 'F007',
+    name: 'Science Lecture Hall',
+    capacity: 120,
+    equipment: ['Lab Table', 'Document Camera', 'Tiered Seating'],
+    description: 'Large lecture hall equipped for science demonstrations and major courses.',
+    imageUrl: 'https://picsum.photos/seed/scilecture/800/600',
     purpose: 'Classroom'
   }
 ];
@@ -61,24 +79,11 @@ export const INITIAL_BOOKINGS: Booking[] = [
     userId: 'u1',
     userName: 'John Doe',
     userRole: 'student',
-    facilityName: 'Grand Auditorium',
+    facilityName: 'Main Theater',
     date: '2024-05-20',
     startTime: '10:00',
     endTime: '12:00',
     purpose: 'Student Club Orientation',
-    status: 'confirmed'
-  },
-  {
-    id: 'b2',
-    facilityId: 'F002',
-    userId: 'a1',
-    userName: 'Admin Jane',
-    userRole: 'admin',
-    facilityName: 'Executive Boardroom',
-    date: '2024-05-21',
-    startTime: '14:00',
-    endTime: '16:00',
-    purpose: 'Faculty Budget Meeting',
     status: 'confirmed'
   }
 ];

@@ -30,6 +30,18 @@
       "description": "Spacious Classroom",
       "imageUrl": "https://picsum.photos/seed/class/800/600",
       "imageHint": "classroom school"
+    },
+    {
+      "id": "theater",
+      "description": "Theater Stage",
+      "imageUrl": "https://picsum.photos/seed/theater/800/600",
+      "imageHint": "theater stage"
+    },
+    {
+      "id": "pehall",
+      "description": "PE Basketball Hall",
+      "imageUrl": "https://picsum.photos/seed/basketball/800/600",
+      "imageHint": "gymnasium hall"
     }
   ]
 }
