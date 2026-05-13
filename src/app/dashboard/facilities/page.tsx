@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Users, 
-  ChevronRight,
   School,
   Monitor,
   Dumbbell,
@@ -19,7 +18,8 @@ import {
   Computer,
   Info,
   AlertCircle,
-  Search
+  Search,
+  Clock
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from "@/components/ui/label";
@@ -46,7 +46,6 @@ export default function FindRoomPage() {
   const [chairs, setChairs] = useState('20');
   const [needsTv, setNeedsTv] = useState(false);
   const [needsPcs, setNeedsPcs] = useState(false);
-  const [pcCount, setPcCount] = useState('0');
   const [purpose, setPurpose] = useState('');
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
@@ -55,19 +54,36 @@ export default function FindRoomPage() {
   // Results State
   const [recommendations, setRecommendations] = useState<any[]>([]);
 
+  /**
+   * Robust Time Overlap Detection
+   * Logic: (StartA < EndB) and (EndA > StartB)
+   */
   const isTimeOverlap = (s1: string, e1: string, s2: string, e2: string) => {
-    return s1 < e2 && s2 < e1;
+    return s1 < e2 && e1 > s2;
   };
 
   const handleFindRoom = () => {
     if (!category || !chairs || !purpose || !date || !startTime || !endTime) {
-      toast({ title: "Missing Info", description: "Please fill in all requirements.", variant: "destructive" });
+      toast({ 
+        title: "Incomplete Request", 
+        description: "Please specify all requirements including date and time.", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    if (startTime >= endTime) {
+      toast({
+        title: "Invalid Time Range",
+        description: "Start time must be earlier than the end time.",
+        variant: "destructive"
+      });
       return;
     }
 
     setLoading(true);
     
-    // Simulate a brief processing delay for better UX
+    // Constraint-Based Matching Engine
     setTimeout(() => {
       const requiredChairs = parseInt(chairs);
       
@@ -82,7 +98,8 @@ export default function FindRoomPage() {
         if (needsTv && !f.equipment.some(e => e.toLowerCase().includes('tv'))) return false;
         if (needsPcs && !f.equipment.some(e => e.toLowerCase().includes('pc') || e.toLowerCase().includes('computer'))) return false;
 
-        // 4. Scheduling Constraint (Check against confirmed bookings)
+        // 4. Scheduling Constraint (CRITICAL: Prevents Double Booking)
+        // Checks against all CONFIRMED bookings for this facility on the specific date
         const hasConflict = bookings.some(b => 
           b.facilityId === f.id && 
           b.date === date && 
@@ -93,17 +110,17 @@ export default function FindRoomPage() {
         return !hasConflict;
       });
 
-      // Sort by best fit (closest capacity)
+      // Sort results by "Best Fit" (closest capacity first to optimize usage)
       const sorted = matched.sort((a, b) => a.capacity - b.capacity);
 
       setRecommendations(sorted.map(r => ({
         ...r,
-        suitabilityReason: `This room perfectly matches your ${category} request. It offers ${r.capacity} seats (meeting your requirement of ${chairs}) and contains the requested equipment: ${r.equipment.join(', ')}.`
+        suitabilityReason: `Verified available for ${date} (${startTime}-${endTime}). Capacity fits ${r.capacity} students with ${r.equipment.join(', ')} equipment.`
       })));
       
       setStep(3);
       setLoading(false);
-    }, 600);
+    }, 800);
   };
 
   const handleBooking = (rec: any) => {
@@ -123,10 +140,14 @@ export default function FindRoomPage() {
 
     addBooking(newBooking);
     toast({ 
-      title: "Request Sent", 
-      description: `Your reservation for ${rec.name} is waiting for admin approval.` 
+      title: "Request Submitted", 
+      description: `Reservation for ${rec.name} has been sent for administrative approval.` 
     });
     setStep(1);
+    // Reset form
+    setPurpose('');
+    setStartTime('');
+    setEndTime('');
   };
 
   return (
@@ -212,15 +233,15 @@ export default function FindRoomPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
               <div className="grid gap-2">
-                <Label>Date</Label>
+                <Label className="flex items-center gap-2"><Calendar className="w-3 h-3" /> Date</Label>
                 <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label>Start Time</Label>
+                <Label className="flex items-center gap-2"><Clock className="w-3 h-3" /> Start Time</Label>
                 <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label>End Time</Label>
+                <Label className="flex items-center gap-2"><Clock className="w-3 h-3" /> End Time</Label>
                 <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
               </div>
             </div>
@@ -228,7 +249,7 @@ export default function FindRoomPage() {
           <CardFooter>
             <Button className="w-full h-12 text-lg font-bold bg-primary text-white hover:opacity-90" onClick={handleFindRoom} disabled={loading}>
               <Search className="w-5 h-5 mr-2" />
-              {loading ? "Calculating Matches..." : "Run Automated Matching Engine"}
+              {loading ? "Checking Conflicts..." : "Run Automated Matching Engine"}
             </Button>
           </CardFooter>
         </Card>
@@ -241,15 +262,15 @@ export default function FindRoomPage() {
               <ArrowLeft className="w-4 h-4 mr-2" /> Adjust Constraints
             </Button>
             <Badge className="bg-secondary text-secondary-foreground font-bold px-3 py-1">
-              {recommendations.length} MATCHES FOUND
+              {recommendations.length} CONFLICT-FREE MATCHES
             </Badge>
           </div>
 
           <Alert className="bg-primary/5 border-primary/20">
             <Info className="w-4 h-4 text-primary" />
-            <AlertTitle className="font-bold text-primary">Automated Matching Result</AlertTitle>
+            <AlertTitle className="font-bold text-primary">Matching Algorithm Report</AlertTitle>
             <AlertDescription className="text-sm leading-relaxed mt-1">
-              The system has filtered through {facilities.length} records and identified the following rooms that satisfy your constraints and are available during the selected time period.
+              The engine has processed {facilities.length} inventory records and verified their schedules. Only rooms with zero overlapping confirmed bookings for your time slot are shown below.
             </AlertDescription>
           </Alert>
 
@@ -257,8 +278,8 @@ export default function FindRoomPage() {
             {recommendations.length === 0 ? (
               <Card className="p-12 text-center text-muted-foreground border-dashed">
                 <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                <p className="font-medium text-lg">No Availability Found</p>
-                <p className="text-sm">Try reducing equipment requirements or checking a different time slot.</p>
+                <p className="font-medium text-lg">No Availability for this Slot</p>
+                <p className="text-sm">Selected rooms are currently booked or don't meet requirements. Try another time or reduce equipment constraints.</p>
               </Card>
             ) : (
               recommendations.map((rec) => (
@@ -271,11 +292,11 @@ export default function FindRoomPage() {
                     <CardContent className="flex-1 p-6 space-y-4">
                       <div>
                         <h4 className="font-bold text-lg text-primary">{rec.name}</h4>
-                        <p className="text-sm text-muted-foreground">Capacity: {rec.capacity} chairs</p>
+                        <p className="text-sm text-muted-foreground">Max Capacity: {rec.capacity} chairs</p>
                       </div>
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-secondary flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> MATCH SUMMARY
+                          <CheckCircle2 className="w-3 h-3" /> AVAILABILITY VERIFIED
                         </div>
                         <p className="text-sm text-muted-foreground leading-relaxed">{rec.suitabilityReason}</p>
                       </div>
