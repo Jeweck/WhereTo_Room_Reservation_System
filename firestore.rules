@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if the user is signed in
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if the user has an admin email
+    // According to the app logic, an email containing "ADMIN" in the prefix is an admin.
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email.lower().matches('.*admin.*@gordoncollege\\.edu\\.ph');
+    }
+
+    // User profiles: Users can read and write their own profile
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Facilities: All authenticated users can browse facilities.
+    // Only administrators can add or modify facility details.
+    match /facilities/{facilityId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Bookings: Users can manage their own reservations.
+    // Administrators can manage all reservations.
+    match /bookings/{bookingId} {
+      // Allow read/update if the user owns the booking or is an admin
+      allow read, update: if isSignedIn() && (
+        (resource != null && resource.data.userId == request.auth.uid) || 
+        isAdmin()
+      );
+      // Allow creation for any signed-in user
+      allow create: if isSignedIn();
+      // Only admins can delete records
+      allow delete: if isAdmin();
+    }
+  }
+}

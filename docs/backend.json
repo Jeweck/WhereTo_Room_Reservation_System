@@ -1,9 +1,8 @@
-
 {
   "entities": {
     "User": {
       "title": "User",
-      "description": "Represents a user in the system.",
+      "description": "Represents a user in the system. Admin users are identified by having 'ADMIN' in their email prefix.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -58,7 +57,7 @@
     },
     "/facilities/{facilityId}": {
       "schema": { "$ref": "#/entities/Facility" },
-      "description": "List of campus facilities."
+      "description": "List of campus facilities accessible to all students."
     },
     "/bookings/{bookingId}": {
       "schema": { "$ref": "#/entities/Booking" },
