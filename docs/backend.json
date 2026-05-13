@@ -53,7 +53,7 @@
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/backend/entities/User" },
-      "description": "User profiles managed by the owner."
+      "description": "User profiles managed by the owner or administrators."
     },
     "/facilities/{facilityId}": {
       "schema": { "$ref": "#/backend/entities/Facility" },
@@ -61,7 +61,7 @@
     },
     "/bookings/{bookingId}": {
       "schema": { "$ref": "#/backend/entities/Booking" },
-      "description": "Facility reservation records. Schedule is publicly readable for all users."
+      "description": "Facility reservation records. Schedule is publicly readable for all users to check availability."
     }
   }
 }

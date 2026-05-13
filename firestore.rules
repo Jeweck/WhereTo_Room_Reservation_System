@@ -15,21 +15,26 @@ service cloud.firestore {
 
     // User profiles: Users can read and write their own profile
     match /users/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow write: if isSignedIn() && request.auth.uid == userId;
     }
 
-    // Facilities: Publicly readable, admin managed
+    // Facilities: Publicly readable for all users to see the list
+    // Only administrators can create, update, or delete facilities
     match /facilities/{facilityId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Bookings: Publicly readable for the schedule, owners/admins can update
+    // Bookings: Publicly readable so students can check availability
+    // Authenticated users can create bookings
+    // Only the owner of the booking or an administrator can update it
+    // Only administrators can delete booking records
     match /bookings/{bookingId} {
       allow read: if true;
       allow create: if isSignedIn();
       allow update: if isSignedIn() && (
-        (resource != null && (resource.data.userId == request.auth.uid || isAdmin()))
+        (resource != null && resource.data.userId == request.auth.uid) || isAdmin()
       );
       allow delete: if isAdmin();
     }
