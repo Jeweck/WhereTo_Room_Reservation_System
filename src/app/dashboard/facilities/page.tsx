@@ -13,19 +13,19 @@ import {
   Dumbbell,
   Theater,
   CheckCircle2,
-  Sparkles,
+  Calendar,
   ArrowLeft,
   Tv,
   Computer,
   Info,
-  Calendar
+  AlertCircle,
+  Search
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from '@/hooks/use-toast';
-import { recommendFacility } from '@/ai/flows/recommend-facility';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const CATEGORIES = [
@@ -36,7 +36,7 @@ const CATEGORIES = [
 ];
 
 export default function FindRoomPage() {
-  const { currentUser, addBooking } = useStore();
+  const { currentUser, addBooking, facilities, bookings } = useStore();
   
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -54,27 +54,56 @@ export default function FindRoomPage() {
 
   // Results State
   const [recommendations, setRecommendations] = useState<any[]>([]);
-  const [aiExplanation, setAiExplanation] = useState('');
 
-  const handleFindRoom = async () => {
+  const isTimeOverlap = (s1: string, e1: string, s2: string, e2: string) => {
+    return s1 < e2 && s2 < e1;
+  };
+
+  const handleFindRoom = () => {
     if (!category || !chairs || !purpose || !date || !startTime || !endTime) {
       toast({ title: "Missing Info", description: "Please fill in all requirements.", variant: "destructive" });
       return;
     }
 
     setLoading(true);
-    try {
-      const requestString = `Category: ${category}. Chairs: ${chairs}. Purpose: ${purpose}. Date: ${date}. Time: ${startTime}-${endTime}. ${needsTv ? 'Needs Smart TV.' : ''} ${needsPcs ? `Needs ${pcCount} PCs.` : ''}`;
+    
+    // Simulate a brief processing delay for better UX
+    setTimeout(() => {
+      const requiredChairs = parseInt(chairs);
       
-      const result = await recommendFacility({ userRequest: requestString });
-      setRecommendations(result.recommendations);
-      setAiExplanation(result.aiExplanation);
+      const matched = facilities.filter(f => {
+        // 1. Category Constraint
+        if (f.purpose !== category) return false;
+        
+        // 2. Capacity Constraint
+        if (f.capacity < requiredChairs) return false;
+        
+        // 3. Equipment Constraints
+        if (needsTv && !f.equipment.some(e => e.toLowerCase().includes('tv'))) return false;
+        if (needsPcs && !f.equipment.some(e => e.toLowerCase().includes('pc') || e.toLowerCase().includes('computer'))) return false;
+
+        // 4. Scheduling Constraint (Check against confirmed bookings)
+        const hasConflict = bookings.some(b => 
+          b.facilityId === f.id && 
+          b.date === date && 
+          b.status === 'confirmed' &&
+          isTimeOverlap(startTime, endTime, b.startTime, b.endTime)
+        );
+
+        return !hasConflict;
+      });
+
+      // Sort by best fit (closest capacity)
+      const sorted = matched.sort((a, b) => a.capacity - b.capacity);
+
+      setRecommendations(sorted.map(r => ({
+        ...r,
+        suitabilityReason: `This room perfectly matches your ${category} request. It offers ${r.capacity} seats (meeting your requirement of ${chairs}) and contains the requested equipment: ${r.equipment.join(', ')}.`
+      })));
+      
       setStep(3);
-    } catch (error) {
-      toast({ title: "Assistant Busy", description: "AI is currently unavailable. Try again shortly.", variant: "destructive" });
-    } finally {
       setLoading(false);
-    }
+    }, 600);
   };
 
   const handleBooking = (rec: any) => {
@@ -104,7 +133,7 @@ export default function FindRoomPage() {
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="text-center space-y-2">
         <h1 className="text-4xl font-headline font-bold text-primary">Browse Facilities</h1>
-        <p className="text-muted-foreground">Select a category to start your intelligent search.</p>
+        <p className="text-muted-foreground">Select a category to start your requirement-based search.</p>
       </div>
 
       {step === 1 && (
@@ -142,26 +171,26 @@ export default function FindRoomPage() {
               <Badge variant="secondary">{category}</Badge>
             </div>
             <CardTitle>Room Requirements</CardTitle>
-            <CardDescription>Specify what you need for this session.</CardDescription>
+            <CardDescription>Constraint-based matching for your specific needs.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="chairs">Number of Chairs</Label>
+                  <Label htmlFor="chairs">Number of Chairs (Minimum)</Label>
                   <div className="relative">
                     <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input id="chairs" type="number" className="pl-10" value={chairs} onChange={(e) => setChairs(e.target.value)} />
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="purpose">Purpose</Label>
+                  <Label htmlFor="purpose">Purpose of Use</Label>
                   <Input id="purpose" placeholder="e.g. Workshop, Seminar" value={purpose} onChange={(e) => setPurpose(e.target.value)} />
                 </div>
               </div>
 
               <div className="space-y-4">
-                <Label>Essential Equipment</Label>
+                <Label>Essential Equipment Constraints</Label>
                 <div className="flex flex-col gap-3 p-4 bg-accent/30 rounded-lg">
                   <div className="flex items-center space-x-2">
                     <Checkbox id="tv" checked={needsTv} onCheckedChange={(checked) => setNeedsTv(!!checked)} />
@@ -176,11 +205,6 @@ export default function FindRoomPage() {
                         <Computer className="w-4 h-4" /> Personal Computers
                       </Label>
                     </div>
-                    {needsPcs && (
-                      <div className="pl-6">
-                        <Input type="number" placeholder="PCs needed" className="h-8 w-24" value={pcCount} onChange={(e) => setPcCount(e.target.value)} />
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -192,18 +216,19 @@ export default function FindRoomPage() {
                 <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label>Start</Label>
+                <Label>Start Time</Label>
                 <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label>End</Label>
+                <Label>End Time</Label>
                 <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
               </div>
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full h-12 text-lg font-bold bg-secondary hover:bg-secondary/90 text-white" onClick={handleFindRoom} disabled={loading}>
-              {loading ? "Analyzing Database..." : "Find Best Room Recommendation"}
+            <Button className="w-full h-12 text-lg font-bold bg-primary text-white hover:opacity-90" onClick={handleFindRoom} disabled={loading}>
+              <Search className="w-5 h-5 mr-2" />
+              {loading ? "Calculating Matches..." : "Run Automated Matching Engine"}
             </Button>
           </CardFooter>
         </Card>
@@ -213,25 +238,27 @@ export default function FindRoomPage() {
         <div className="space-y-6 animate-in zoom-in-95 duration-500">
           <div className="flex items-center justify-between">
             <Button variant="ghost" onClick={() => setStep(2)}>
-              <ArrowLeft className="w-4 h-4 mr-2" /> Adjust Requirements
+              <ArrowLeft className="w-4 h-4 mr-2" /> Adjust Constraints
             </Button>
-            <Badge className="bg-primary text-white font-bold px-3 py-1">
-              <Sparkles className="w-3 h-3 mr-2 fill-current" /> AI RECOMMENDED
+            <Badge className="bg-secondary text-secondary-foreground font-bold px-3 py-1">
+              {recommendations.length} MATCHES FOUND
             </Badge>
           </div>
 
-          <Alert className="bg-secondary/10 border-secondary/30">
-            <Info className="w-4 h-4 text-secondary" />
-            <AlertTitle className="font-bold text-secondary">Why these rooms?</AlertTitle>
-            <AlertDescription className="italic text-sm leading-relaxed mt-1">
-              "{aiExplanation}"
+          <Alert className="bg-primary/5 border-primary/20">
+            <Info className="w-4 h-4 text-primary" />
+            <AlertTitle className="font-bold text-primary">Automated Matching Result</AlertTitle>
+            <AlertDescription className="text-sm leading-relaxed mt-1">
+              The system has filtered through {facilities.length} records and identified the following rooms that satisfy your constraints and are available during the selected time period.
             </AlertDescription>
           </Alert>
 
           <div className="grid gap-4">
             {recommendations.length === 0 ? (
               <Card className="p-12 text-center text-muted-foreground border-dashed">
-                <p>No exact matches found. Try reducing your requirements.</p>
+                <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                <p className="font-medium text-lg">No Availability Found</p>
+                <p className="text-sm">Try reducing equipment requirements or checking a different time slot.</p>
               </Card>
             ) : (
               recommendations.map((rec) => (
@@ -248,7 +275,7 @@ export default function FindRoomPage() {
                       </div>
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-secondary flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> SUITABILITY
+                          <CheckCircle2 className="w-3 h-3" /> MATCH SUMMARY
                         </div>
                         <p className="text-sm text-muted-foreground leading-relaxed">{rec.suitabilityReason}</p>
                       </div>
@@ -261,7 +288,7 @@ export default function FindRoomPage() {
                       </div>
                     </CardContent>
                     <div className="p-6 md:border-l border-dashed flex flex-col justify-center bg-accent/10">
-                      <Button className="w-full md:w-auto font-bold" onClick={() => handleBooking(rec)}>
+                      <Button className="w-full md:w-auto font-bold bg-secondary hover:bg-secondary/90 text-white" onClick={() => handleBooking(rec)}>
                         Reserve Room
                       </Button>
                     </div>
