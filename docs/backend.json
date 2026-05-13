@@ -2,7 +2,7 @@
   "entities": {
     "User": {
       "title": "User",
-      "description": "Represents a user in the system. Admin users are identified by having 'ADMIN' in their email prefix.",
+      "description": "Represents a user in the system. Profiles are open for read/write during development.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -14,7 +14,7 @@
     },
     "Facility": {
       "title": "Facility",
-      "description": "A bookable campus facility. Managed by administrators.",
+      "description": "A bookable campus facility. Publicly readable for the catalog.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -29,7 +29,7 @@
     },
     "Booking": {
       "title": "Booking",
-      "description": "A reservation for a facility. Schedule is publicly readable to check availability.",
+      "description": "A reservation for a facility. Schedule is publicly readable for availability checks.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -53,15 +53,15 @@
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/backend/entities/User" },
-      "description": "User profiles. Open access for development."
+      "description": "User profiles. Open access for prototype development."
     },
     "/facilities/{facilityId}": {
       "schema": { "$ref": "#/backend/entities/Facility" },
-      "description": "List of campus facilities. Open access for development."
+      "description": "List of campus facilities. Open access for prototype development."
     },
     "/bookings/{bookingId}": {
       "schema": { "$ref": "#/backend/entities/Booking" },
-      "description": "Facility reservation records. Open access for development."
+      "description": "Facility reservation records. Open access for prototype development."
     }
   }
 }
