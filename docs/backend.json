@@ -3,7 +3,7 @@
   "entities": {
     "User": {
       "title": "User",
-      "description": "Represents a user in the system. Profiles are open for read/write during development.",
+      "description": "Represents a user in the system.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -15,7 +15,7 @@
     },
     "Facility": {
       "title": "Facility",
-      "description": "A bookable campus facility. Publicly readable for the catalog.",
+      "description": "A bookable campus facility.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -30,7 +30,7 @@
     },
     "Booking": {
       "title": "Booking",
-      "description": "A reservation for a facility. Schedule is publicly readable for availability checks.",
+      "description": "A reservation for a facility.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -54,19 +54,19 @@
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/backend/entities/User" },
-      "description": "User profiles. Open access for prototype development."
+      "description": "User profiles."
     },
     "/facilities/{facilityId}": {
       "schema": { "$ref": "#/backend/entities/Facility" },
-      "description": "List of campus facilities. Open access for prototype development."
+      "description": "List of campus facilities."
     },
     "/bookings/{bookingId}": {
       "schema": { "$ref": "#/backend/entities/Booking" },
-      "description": "Facility reservation records. Open access for prototype development."
+      "description": "Facility reservation records."
     }
   },
   "metadata": {
-    "updatedAt": "2024-05-13T16:25:00Z",
-    "version": "1.0.6"
+    "updatedAt": "2024-05-13T16:30:00Z",
+    "version": "1.0.8"
   }
 }
