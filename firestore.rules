@@ -7,7 +7,6 @@ service cloud.firestore {
     }
 
     // Helper function to check if the user has an admin email
-    // According to the app logic, an email containing "ADMIN" in the prefix is an admin.
     function isAdmin() {
       return isSignedIn() && request.auth.token.email.lower().matches('.*admin.*@gordoncollege\\.edu\\.ph');
     }
@@ -17,18 +16,17 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && request.auth.uid == userId;
     }
 
-    // Facilities: All authenticated users can browse facilities.
+    // Facilities: All users can browse the list of facilities (Public campus info).
     // Only administrators can add or modify facility details.
     match /facilities/{facilityId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Bookings: All authenticated users can read/list to see the schedule.
-    // Managing specific records is restricted to owners or admins.
+    // Bookings: All users can read the schedule to check availability.
     match /bookings/{bookingId} {
-      // Allow list and get for all signed-in users to see the campus schedule
-      allow read: if isSignedIn();
+      // Allow list and get for all users to see the campus schedule
+      allow read: if true;
       
       // Allow update if the user owns the booking or is an admin
       allow update: if isSignedIn() && (

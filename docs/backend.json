@@ -29,7 +29,7 @@
     },
     "Booking": {
       "title": "Booking",
-      "description": "A reservation for a facility. Users can view all bookings to check availability.",
+      "description": "A reservation for a facility. Schedule is publicly readable to check availability.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -57,11 +57,11 @@
     },
     "/facilities/{facilityId}": {
       "schema": { "$ref": "#/entities/Facility" },
-      "description": "List of campus facilities accessible to all students."
+      "description": "List of campus facilities accessible to all."
     },
     "/bookings/{bookingId}": {
       "schema": { "$ref": "#/entities/Booking" },
-      "description": "Facility reservation records. All authenticated users can read to see the schedule."
+      "description": "Facility reservation records. Schedule is publicly readable."
     }
   }
 }
