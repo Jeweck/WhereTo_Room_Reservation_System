@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -63,5 +64,9 @@
       "schema": { "$ref": "#/backend/entities/Booking" },
       "description": "Facility reservation records. Open access for prototype development."
     }
+  },
+  "metadata": {
+    "updatedAt": "2024-05-13T16:00:00Z",
+    "version": "1.0.3"
   }
 }

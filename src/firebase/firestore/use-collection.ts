@@ -36,7 +36,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setData(items as T[]);
         setLoading(false);
       },
-      async (err) => {
+      (err) => {
         const permissionError = new FirestorePermissionError({
           path: (query as any)._query?.path?.toString() || 'unknown',
           operation: 'list',
