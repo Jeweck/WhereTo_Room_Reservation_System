@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -14,7 +15,7 @@
     },
     "Facility": {
       "title": "Facility",
-      "description": "A bookable campus facility.",
+      "description": "A bookable campus facility. Managed by administrators.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -52,16 +53,16 @@
   },
   "firestore": {
     "/users/{userId}": {
-      "schema": { "$ref": "#/entities/User" },
+      "schema": { "$ref": "#/backend/entities/User" },
       "description": "User profiles managed by the owner."
     },
     "/facilities/{facilityId}": {
-      "schema": { "$ref": "#/entities/Facility" },
+      "schema": { "$ref": "#/backend/entities/Facility" },
       "description": "List of campus facilities accessible to all, managed by admins."
     },
     "/bookings/{bookingId}": {
-      "schema": { "$ref": "#/entities/Booking" },
-      "description": "Facility reservation records. Schedule is publicly readable, managed by owners or admins."
+      "schema": { "$ref": "#/backend/entities/Booking" },
+      "description": "Facility reservation records. Schedule is publicly readable."
     }
   }
 }

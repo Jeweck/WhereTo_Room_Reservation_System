@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { User, Facility, Booking, Role } from '@/lib/types';
 import { INITIAL_FACILITIES } from '@/lib/mock-data';
 import { 
@@ -26,11 +26,12 @@ export function useStore() {
   
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  const facilitiesQuery = db ? collection(db, 'facilities') : null;
+  // Memoize queries to prevent infinite re-subscription loops and SDK assertion errors
+  const facilitiesQuery = useMemo(() => (db ? collection(db, 'facilities') : null), [db]);
   const { data: facilitiesData } = useCollection<Facility>(facilitiesQuery);
   const facilities = facilitiesData || INITIAL_FACILITIES;
 
-  const bookingsQuery = db ? collection(db, 'bookings') : null;
+  const bookingsQuery = useMemo(() => (db ? collection(db, 'bookings') : null), [db]);
   const { data: bookingsData } = useCollection<Booking>(bookingsQuery);
   const bookings = bookingsData || [];
 
@@ -168,10 +169,14 @@ export function useStore() {
       });
   };
 
+  // Seed initial facilities if collection is empty
   useEffect(() => {
     if (db && facilitiesData?.length === 0) {
       INITIAL_FACILITIES.forEach(f => {
-        setDoc(doc(db, 'facilities', f.id), f);
+        const facilityRef = doc(db, 'facilities', f.id);
+        setDoc(facilityRef, f).catch(() => {
+          // Silent catch for initial seeding
+        });
       });
     }
   }, [db, facilitiesData]);
