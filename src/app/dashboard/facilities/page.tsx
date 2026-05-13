@@ -3,94 +3,88 @@
 
 import { useState } from 'react';
 import { useStore } from '@/hooks/use-store';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-  Search, 
   Users, 
-  Package, 
   ChevronRight,
   School,
   Monitor,
   Dumbbell,
-  Layout,
-  Theater
+  Theater,
+  CheckCircle2,
+  Sparkles,
+  ArrowLeft,
+  Tv,
+  Computer,
+  Info
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { recommendFacility } from '@/ai/flows/recommend-facility';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const CATEGORIES = [
-  { label: 'All', icon: Layout },
-  { label: 'Classroom', icon: School },
-  { label: 'Theater', icon: Theater },
-  { label: 'PE Hall', icon: Dumbbell },
-  { label: 'Computer Lab', icon: Monitor },
+  { label: 'Classroom', icon: School, description: 'Standard rooms for lectures and seminars' },
+  { label: 'Theater', icon: Theater, description: 'Auditoriums and performance spaces' },
+  { label: 'PE Hall', icon: Dumbbell, description: 'Sports and fitness facilities' },
+  { label: 'Computer Lab', icon: Monitor, description: 'Tech-focused rooms with workstations' },
 ];
 
-export default function FacilitiesPage() {
-  const { facilities, currentUser, addBooking, bookings } = useStore();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedFacility, setSelectedFacility] = useState<any>(null);
+export default function FindRoomPage() {
+  const { currentUser, addBooking } = useStore();
   
-  // Booking Form State
+  // Navigation State
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  // Requirement State
+  const [category, setCategory] = useState('');
+  const [chairs, setChairs] = useState('20');
+  const [needsTv, setNeedsTv] = useState(false);
+  const [needsPcs, setNeedsPcs] = useState(false);
+  const [pcCount, setPcCount] = useState('0');
+  const [purpose, setPurpose] = useState('');
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-  const [purpose, setPurpose] = useState('');
 
-  const filteredFacilities = facilities.filter(f => {
-    const matchesSearch = f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      f.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = selectedCategory === 'All' || f.purpose === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
+  // Results State
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [aiExplanation, setAiExplanation] = useState('');
 
-  const checkConflicts = (facilityId: string, bookingDate: string, start: string, end: string) => {
-    return bookings.some(b => 
-      b.facilityId === facilityId && 
-      b.date === bookingDate && 
-      (b.status === 'confirmed' || b.status === 'pending') &&
-      ((start >= b.startTime && start < b.endTime) || (end > b.startTime && end <= b.endTime))
-    );
+  const handleFindRoom = async () => {
+    if (!category || !chairs || !purpose || !date || !startTime || !endTime) {
+      toast({ title: "Missing Info", description: "Please fill in all basic requirements.", variant: "destructive" });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const requestString = `I need a ${category} for ${chairs} people on ${date} from ${startTime} to ${endTime} for ${purpose}. ${needsTv ? 'I need a TV.' : ''} ${needsPcs ? `I need at least ${pcCount} PCs.` : ''}`;
+      
+      const result = await recommendFacility({ userRequest: requestString });
+      setRecommendations(result.recommendations);
+      setAiExplanation(result.aiExplanation);
+      setStep(3);
+    } catch (error) {
+      toast({ title: "Search Error", description: "The AI assistant is temporarily unavailable.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleBooking = () => {
-    if (!selectedFacility || !date || !startTime || !endTime || !purpose) {
-      toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
-      return;
-    }
-
-    if (checkConflicts(selectedFacility.id, date, startTime, endTime)) {
-      toast({ 
-        title: "Schedule Conflict", 
-        description: "This room is already reserved for the selected time.", 
-        variant: "destructive" 
-      });
-      return;
-    }
-
+  const handleBooking = (rec: any) => {
     const newBooking = {
       id: Math.random().toString(36).substr(2, 9),
-      facilityId: selectedFacility.id,
+      facilityId: rec.id,
       userId: currentUser?.id || 'guest',
       userName: currentUser?.name || 'Guest',
       userRole: currentUser?.role || 'student',
-      facilityName: selectedFacility.name,
+      facilityName: rec.name,
       date,
       startTime,
       endTime,
@@ -101,134 +95,221 @@ export default function FacilitiesPage() {
     addBooking(newBooking);
     toast({ 
       title: "Request Submitted", 
-      description: `Reservation request for ${selectedFacility.name} has been sent for approval.` 
+      description: `Reservation request for ${rec.name} has been sent for approval.` 
     });
-    setSelectedFacility(null);
+    // Reset to step 1
+    setStep(1);
+    setCategory('');
     setPurpose('');
-    setDate('');
-    setStartTime('');
-    setEndTime('');
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-headline font-bold text-primary">Browse Facilities</h1>
-          <p className="text-muted-foreground">Select a category to view available rooms by number.</p>
-        </div>
-        <div className="flex gap-2">
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search room numbers..." 
-              className="pl-9 bg-white border-none shadow-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
+      <div className="text-center space-y-2">
+        <h1 className="text-4xl font-headline font-bold text-primary">Find the Perfect Room</h1>
+        <p className="text-muted-foreground">Specify your requirements and let our AI suggest the best space.</p>
       </div>
 
-      {/* Category Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide">
-        {CATEGORIES.map((cat) => (
-          <Button
-            key={cat.label}
-            variant={selectedCategory === cat.label ? "default" : "outline"}
-            className={cn(
-              "rounded-full px-6 flex items-center gap-2 border-none shadow-sm transition-all whitespace-nowrap",
-              selectedCategory === cat.label ? "bg-primary text-white" : "bg-white hover:bg-accent/50"
-            )}
-            onClick={() => setSelectedCategory(cat.label)}
-          >
-            <cat.icon className="w-4 h-4" />
-            {cat.label}s
-          </Button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredFacilities.length === 0 ? (
-          <div className="col-span-full py-20 text-center text-muted-foreground">
-            <School className="w-16 h-16 mx-auto mb-4 opacity-10" />
-            <p className="text-xl">No rooms found in this category.</p>
-          </div>
-        ) : (
-          filteredFacilities.map((facility) => (
-            <Card key={facility.id} className="overflow-hidden border-none shadow-md group hover:shadow-xl transition-all duration-300 flex flex-col">
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <Badge variant="outline" className="mb-2 border-primary/20 text-primary bg-primary/5">
-                    {facility.purpose}
-                  </Badge>
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Users className="w-3.5 h-3.5 text-secondary" />
-                    <span>{facility.capacity}</span>
-                  </div>
+      {/* STEP 1: CATEGORY SELECTION */}
+      {step === 1 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {CATEGORIES.map((cat) => (
+            <Card 
+              key={cat.label} 
+              className={`cursor-pointer border-2 transition-all hover:shadow-md ${category === cat.label ? 'border-primary bg-primary/5' : 'border-transparent'}`}
+              onClick={() => {
+                setCategory(cat.label);
+                setStep(2);
+              }}
+            >
+              <CardHeader className="flex flex-row items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <cat.icon className="w-6 h-6" />
                 </div>
-                <CardTitle className="text-2xl group-hover:text-secondary transition-colors">{facility.name}</CardTitle>
-                <CardDescription className="line-clamp-2">{facility.description}</CardDescription>
+                <div>
+                  <CardTitle>{cat.label}s</CardTitle>
+                  <CardDescription>{cat.description}</CardDescription>
+                </div>
               </CardHeader>
-              <CardContent className="flex-1 pt-2">
-                <div className="space-y-3">
-                  <div className="flex flex-wrap gap-1.5">
-                    {facility.equipment.map((item, idx) => (
-                      <span key={idx} className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded bg-accent text-primary uppercase">
-                        {item}
-                      </span>
-                    ))}
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* STEP 2: REQUIREMENTS FORM */}
+      {step === 2 && (
+        <Card className="border-none shadow-xl">
+          <CardHeader>
+            <div className="flex items-center gap-2 mb-2">
+              <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="p-0 h-auto">
+                <ArrowLeft className="w-4 h-4 mr-1" /> Back
+              </Button>
+              <Badge variant="secondary">{category}</Badge>
+            </div>
+            <CardTitle>Room Requirements</CardTitle>
+            <CardDescription>What do you need for your {category}?</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="chairs">Number of Chairs (Capacity)</Label>
+                  <div className="relative">
+                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input 
+                      id="chairs" 
+                      type="number" 
+                      className="pl-10" 
+                      value={chairs} 
+                      onChange={(e) => setChairs(e.target.value)} 
+                    />
                   </div>
                 </div>
-              </CardContent>
-              <CardFooter className="bg-accent/10 border-t pt-4">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button 
-                      className="w-full group" 
-                      onClick={() => setSelectedFacility(facility)}
-                    >
-                      Reserve {facility.name}
-                      <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Reserve {selectedFacility?.name}</DialogTitle>
-                      <DialogDescription>
-                        Fill in the details to request this room.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="date">Date</Label>
-                        <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="start">Start Time</Label>
-                          <Input id="start" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor="end">End Time</Label>
-                          <Input id="end" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
-                        </div>
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="purpose">Purpose</Label>
-                        <Input id="purpose" placeholder="Ex: Math 101 Lecture" value={purpose} onChange={(e) => setPurpose(e.target.value)} />
-                      </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="purpose">Purpose of Reservation</Label>
+                  <Input 
+                    id="purpose" 
+                    placeholder="Ex: Coding Workshop" 
+                    value={purpose} 
+                    onChange={(e) => setPurpose(e.target.value)} 
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid gap-2">
+                  <Label>Additional Equipment</Label>
+                  <div className="flex flex-col gap-3 p-4 bg-accent/30 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="tv" checked={needsTv} onCheckedChange={(checked) => setNeedsTv(!!checked)} />
+                      <Label htmlFor="tv" className="flex items-center gap-2 cursor-pointer">
+                        <Tv className="w-4 h-4 text-primary" /> Smart TV
+                      </Label>
                     </div>
-                    <DialogFooter>
-                      <Button type="submit" onClick={handleBooking} className="w-full">Submit Request</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </CardFooter>
-            </Card>
-          )
-        ))}
-      </div>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox id="pcs" checked={needsPcs} onCheckedChange={(checked) => setNeedsPcs(!!checked)} />
+                        <Label htmlFor="pcs" className="flex items-center gap-2 cursor-pointer">
+                          <Computer className="w-4 h-4 text-primary" /> Personal Computers
+                        </Label>
+                      </div>
+                      {needsPcs && (
+                        <div className="pl-6 mt-1">
+                          <Label htmlFor="pcCount" className="text-xs text-muted-foreground">Minimum PCs needed</Label>
+                          <Input 
+                            id="pcCount" 
+                            type="number" 
+                            className="h-8 w-24" 
+                            value={pcCount} 
+                            onChange={(e) => setPcCount(e.target.value)} 
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
+              <div className="grid gap-2">
+                <Label htmlFor="date">Date</Label>
+                <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="start">Start Time</Label>
+                <Input id="start" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="end">End Time</Label>
+                <Input id="end" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button className="w-full h-12 text-lg font-bold bg-secondary hover:bg-secondary/90 text-white" onClick={handleFindRoom} disabled={loading}>
+              {loading ? (
+                <>Analyzing Room Availability...</>
+              ) : (
+                <>
+                  Find Suitable Room <Sparkles className="ml-2 w-5 h-5" />
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
+
+      {/* STEP 3: RECOMMENDATIONS */}
+      {step === 3 && (
+        <div className="space-y-6 animate-in zoom-in-95 duration-500">
+          <div className="flex items-center justify-between">
+            <Button variant="ghost" onClick={() => setStep(2)}>
+              <ArrowLeft className="w-4 h-4 mr-2" /> Modify Requirements
+            </Button>
+            <Badge className="bg-secondary">AI Recommended</Badge>
+          </div>
+
+          <Alert className="bg-primary/5 border-primary/20">
+            <Info className="w-4 h-4 text-primary" />
+            <AlertTitle className="font-bold text-primary">System Recommendation</AlertTitle>
+            <AlertDescription className="italic text-sm leading-relaxed">
+              "{aiExplanation}"
+            </AlertDescription>
+          </Alert>
+
+          <div className="grid gap-4">
+            {recommendations.length === 0 ? (
+              <Card className="p-12 text-center text-muted-foreground border-dashed">
+                <p>No suitable rooms were found for these exact requirements. Try adjusting your needs.</p>
+              </Card>
+            ) : (
+              recommendations.map((rec) => (
+                <Card key={rec.id} className="border-none shadow-md overflow-hidden hover:shadow-lg transition-all group">
+                  <div className="flex flex-col md:flex-row">
+                    <div className="w-full md:w-48 bg-primary text-white p-6 flex flex-col justify-center items-center text-center">
+                      <span className="text-xs font-bold uppercase tracking-widest opacity-70 mb-1">Room No.</span>
+                      <h3 className="text-3xl font-black">{rec.id.replace('CR', '').replace('TH-', '').replace('PE-', '').replace('CL', '')}</h3>
+                      <p className="text-[10px] mt-2 bg-white/10 px-2 py-0.5 rounded uppercase font-bold">{rec.name}</p>
+                    </div>
+                    <CardContent className="flex-1 p-6 space-y-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-bold text-lg text-primary flex items-center gap-2">
+                            {rec.name}
+                            <Badge variant="outline" className="text-[10px] h-5">{category}</Badge>
+                          </h4>
+                          <p className="text-sm text-muted-foreground mt-1">Capacity: {rec.capacity} chairs</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-secondary">
+                          <CheckCircle2 className="w-4 h-4" /> Why this room?
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{rec.suitabilityReason}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {rec.equipment.map((eq: string) => (
+                          <span key={eq} className="px-2 py-0.5 rounded bg-accent text-[10px] font-bold text-primary uppercase">
+                            {eq}
+                          </span>
+                        ))}
+                      </div>
+                    </CardContent>
+                    <div className="p-6 md:border-l border-dashed flex flex-col justify-center bg-accent/10">
+                      <Button className="w-full md:w-auto font-bold group" onClick={() => handleBooking(rec)}>
+                        Reserve Room
+                        <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
