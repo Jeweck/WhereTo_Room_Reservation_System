@@ -7,8 +7,7 @@ import { INITIAL_FACILITIES } from '@/lib/mock-data';
 import { 
   useFirestore, 
   useAuth, 
-  useCollection, 
-  useDoc 
+  useCollection 
 } from '@/firebase';
 import { 
   doc, 
@@ -16,24 +15,21 @@ import {
   updateDoc, 
   deleteDoc, 
   collection, 
-  query, 
-  where,
   writeBatch
 } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 export function useStore() {
   const db = useFirestore();
   const auth = useAuth();
   
-  // Local state for the current logged-in user
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  // Sync Facilities from Firestore
   const facilitiesQuery = db ? collection(db, 'facilities') : null;
   const { data: facilitiesData } = useCollection<Facility>(facilitiesQuery);
   const facilities = facilitiesData || INITIAL_FACILITIES;
 
-  // Sync Bookings from Firestore
   const bookingsQuery = db ? collection(db, 'bookings') : null;
   const { data: bookingsData } = useCollection<Booking>(bookingsQuery);
   const bookings = bookingsData || [];
@@ -74,9 +70,16 @@ export function useStore() {
     setCurrentUser(user);
     localStorage.setItem('whereto_user', JSON.stringify(user));
     
-    // Also save user profile to Firestore
     if (db && user.id) {
-      setDoc(doc(db, 'users', user.id), user, { merge: true });
+      const userRef = doc(db, 'users', user.id);
+      setDoc(userRef, user, { merge: true })
+        .catch(async () => {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: userRef.path,
+            operation: 'write',
+            requestResourceData: user
+          }));
+        });
     }
   };
 
@@ -88,17 +91,41 @@ export function useStore() {
 
   const addBooking = (booking: Booking) => {
     if (!db) return;
-    setDoc(doc(db, 'bookings', booking.id), booking);
+    const bookingRef = doc(db, 'bookings', booking.id);
+    setDoc(bookingRef, booking)
+      .catch(async () => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: bookingRef.path,
+          operation: 'create',
+          requestResourceData: booking
+        }));
+      });
   };
 
   const cancelBooking = (id: string) => {
     if (!db) return;
-    updateDoc(doc(db, 'bookings', id), { status: 'cancelled' });
+    const bookingRef = doc(db, 'bookings', id);
+    updateDoc(bookingRef, { status: 'cancelled' })
+      .catch(async () => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: bookingRef.path,
+          operation: 'update',
+          requestResourceData: { status: 'cancelled' }
+        }));
+      });
   };
 
   const approveBooking = (id: string) => {
     if (!db) return;
-    updateDoc(doc(db, 'bookings', id), { status: 'confirmed' });
+    const bookingRef = doc(db, 'bookings', id);
+    updateDoc(bookingRef, { status: 'confirmed' })
+      .catch(async () => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: bookingRef.path,
+          operation: 'update',
+          requestResourceData: { status: 'confirmed' }
+        }));
+      });
   };
 
   const clearAllBookings = async () => {
@@ -107,20 +134,40 @@ export function useStore() {
     bookings.forEach((b) => {
       batch.delete(doc(db, 'bookings', b.id));
     });
-    await batch.commit();
+    batch.commit()
+      .catch(async () => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: '/bookings',
+          operation: 'delete'
+        }));
+      });
   };
 
   const upsertFacility = (facility: Facility) => {
     if (!db) return;
-    setDoc(doc(db, 'facilities', facility.id), facility, { merge: true });
+    const facilityRef = doc(db, 'facilities', facility.id);
+    setDoc(facilityRef, facility, { merge: true })
+      .catch(async () => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: facilityRef.path,
+          operation: 'write',
+          requestResourceData: facility
+        }));
+      });
   };
 
   const deleteFacility = (id: string) => {
     if (!db) return;
-    deleteDoc(doc(db, 'facilities', id));
+    const facilityRef = doc(db, 'facilities', id);
+    deleteDoc(facilityRef)
+      .catch(async () => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: facilityRef.path,
+          operation: 'delete'
+        }));
+      });
   };
 
-  // One-time initialization to seed facilities if collection is empty
   useEffect(() => {
     if (db && facilitiesData?.length === 0) {
       INITIAL_FACILITIES.forEach(f => {

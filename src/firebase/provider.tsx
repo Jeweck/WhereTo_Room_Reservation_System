@@ -5,6 +5,7 @@ import React, { createContext, useContext } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Firestore } from 'firebase/firestore';
 import { Auth } from 'firebase/auth';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 interface FirebaseContextType {
   firebaseApp: FirebaseApp | null;
@@ -31,6 +32,7 @@ export function FirebaseProvider({
 }) {
   return (
     <FirebaseContext.Provider value={{ firebaseApp, firestore, auth }}>
+      <FirebaseErrorListener />
       {children}
     </FirebaseContext.Provider>
   );
@@ -50,8 +52,5 @@ export const useFirestore = () => {
 
 export const useAuth = () => {
   const context = useContext(FirebaseContext);
-  // This hook returns the Auth instance, not the current user.
-  // We use useAuth().currentUser for simple checks if needed, 
-  // or a dedicated useUser hook for reactive user state.
   return context.auth;
 };

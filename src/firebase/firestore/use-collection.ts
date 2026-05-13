@@ -8,6 +8,8 @@ import {
   QuerySnapshot,
   DocumentData,
 } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 /**
  * Hook to subscribe to a Firestore collection or query.
@@ -31,11 +33,15 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           ...doc.data(),
           id: doc.id,
         }));
-        setData(items);
+        setData(items as T[]);
         setLoading(false);
       },
-      (err) => {
-        console.error('Firestore collection error:', err);
+      async (err) => {
+        const permissionError = new FirestorePermissionError({
+          path: (query as any)._query?.path?.toString() || 'unknown',
+          operation: 'list',
+        });
+        errorEmitter.emit('permission-error', permissionError);
         setError(err);
         setLoading(false);
       }
