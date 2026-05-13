@@ -11,11 +11,11 @@ import {
   Users, 
   Package, 
   ChevronRight,
-  Filter,
   School,
   Monitor,
   Dumbbell,
-  Layout
+  Layout,
+  Theater
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -35,7 +35,7 @@ import { cn } from '@/lib/utils';
 const CATEGORIES = [
   { label: 'All', icon: Layout },
   { label: 'Classroom', icon: School },
-  { label: 'Theater', icon: Layout },
+  { label: 'Theater', icon: Theater },
   { label: 'PE Hall', icon: Dumbbell },
   { label: 'Computer Lab', icon: Monitor },
 ];
@@ -54,8 +54,7 @@ export default function FacilitiesPage() {
 
   const filteredFacilities = facilities.filter(f => {
     const matchesSearch = f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      f.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      f.purpose.toLowerCase().includes(searchTerm.toLowerCase());
+      f.description.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = selectedCategory === 'All' || f.purpose === selectedCategory;
     
@@ -80,7 +79,7 @@ export default function FacilitiesPage() {
     if (checkConflicts(selectedFacility.id, date, startTime, endTime)) {
       toast({ 
         title: "Schedule Conflict", 
-        description: "This time slot is either booked or has a pending request.", 
+        description: "This room is already reserved for the selected time.", 
         variant: "destructive" 
       });
       return;
@@ -103,7 +102,7 @@ export default function FacilitiesPage() {
     addBooking(newBooking);
     toast({ 
       title: "Request Submitted", 
-      description: "Your reservation request has been sent for administrative approval." 
+      description: `Reservation request for ${selectedFacility.name} has been sent for approval.` 
     });
     setSelectedFacility(null);
     setPurpose('');
@@ -117,13 +116,13 @@ export default function FacilitiesPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-headline font-bold text-primary">Browse Facilities</h1>
-          <p className="text-muted-foreground">Find the perfect space for your next activity.</p>
+          <p className="text-muted-foreground">Select a category to view available rooms.</p>
         </div>
         <div className="flex gap-2">
           <div className="relative w-full md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
-              placeholder="Search facilities..." 
+              placeholder="Search room numbers..." 
               className="pl-9 bg-white border-none shadow-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -145,7 +144,7 @@ export default function FacilitiesPage() {
             onClick={() => setSelectedCategory(cat.label)}
           >
             <cat.icon className="w-4 h-4" />
-            {cat.label}
+            {cat.label}s
           </Button>
         ))}
       </div>
@@ -154,7 +153,7 @@ export default function FacilitiesPage() {
         {filteredFacilities.length === 0 ? (
           <div className="col-span-full py-20 text-center text-muted-foreground">
             <School className="w-16 h-16 mx-auto mb-4 opacity-10" />
-            <p className="text-xl">No facilities found matching your criteria.</p>
+            <p className="text-xl">No rooms found in this category.</p>
           </div>
         ) : (
           filteredFacilities.map((facility) => (
@@ -165,6 +164,7 @@ export default function FacilitiesPage() {
                   alt={facility.name}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  data-ai-hint={facility.purpose}
                 />
                 <div className="absolute top-3 right-3">
                   <Badge className="bg-white/90 text-primary hover:bg-white backdrop-blur-sm border-none shadow-sm">
@@ -173,14 +173,14 @@ export default function FacilitiesPage() {
                 </div>
               </div>
               <CardHeader>
-                <CardTitle className="text-xl group-hover:text-secondary transition-colors line-clamp-1">{facility.name}</CardTitle>
-                <CardDescription className="line-clamp-2 h-10">{facility.description}</CardDescription>
+                <CardTitle className="text-2xl group-hover:text-secondary transition-colors">{facility.name}</CardTitle>
+                <CardDescription className="line-clamp-2">{facility.description}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1.5">
                     <Users className="w-4 h-4 text-secondary" />
-                    <span>Up to {facility.capacity}</span>
+                    <span>Capacity: {facility.capacity}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Package className="w-4 h-4 text-secondary" />
@@ -195,7 +195,7 @@ export default function FacilitiesPage() {
                       className="w-full group" 
                       onClick={() => setSelectedFacility(facility)}
                     >
-                      Reserve Now
+                      Reserve {facility.name}
                       <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </DialogTrigger>
@@ -203,7 +203,7 @@ export default function FacilitiesPage() {
                     <DialogHeader>
                       <DialogTitle>Reserve {selectedFacility?.name}</DialogTitle>
                       <DialogDescription>
-                        Your reservation will be sent to the administrator for approval.
+                        Fill in the details to request this room.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -223,11 +223,11 @@ export default function FacilitiesPage() {
                       </div>
                       <div className="grid gap-2">
                         <Label htmlFor="purpose">Purpose</Label>
-                        <Input id="purpose" placeholder="Ex: Student Org Meeting" value={purpose} onChange={(e) => setPurpose(e.target.value)} />
+                        <Input id="purpose" placeholder="Ex: Math 101 Lecture" value={purpose} onChange={(e) => setPurpose(e.target.value)} />
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button type="submit" onClick={handleBooking} className="w-full">Submit for Approval</Button>
+                      <Button type="submit" onClick={handleBooking} className="w-full">Submit Request</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
