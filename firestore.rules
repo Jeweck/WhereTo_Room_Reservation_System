@@ -2,7 +2,8 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Open prototype rules for unblocked development
+    // Wide open rules for unblocked prototype development.
+    // These will allow all read and write operations from any source.
     match /{document=**} {
       allow read, write: if true;
     }

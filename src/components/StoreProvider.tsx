@@ -5,7 +5,7 @@ import React, { createContext, useContext, useEffect, useState, useMemo } from '
 import { User, Facility, Booking, Role } from '@/lib/types';
 import { INITIAL_FACILITIES } from '@/lib/mock-data';
 import { useFirestore, useAuth, useCollection } from '@/firebase';
-import { doc, setDoc, updateDoc, deleteDoc, collection, writeBatch, query } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, deleteDoc, collection, writeBatch } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -32,30 +32,41 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  // Queries are memoized and kept at the top level to prevent re-subscriptions
-  const facilitiesQuery = useMemo(() => (db ? query(collection(db, 'facilities')) : null), [db]);
-  const bookingsQuery = useMemo(() => (db ? query(collection(db, 'bookings')) : null), [db]);
+  // Queries are memoized at the top level to prevent re-subscriptions and assertion errors.
+  const facilitiesRef = useMemo(() => (db ? collection(db, 'facilities') : null), [db]);
+  const bookingsRef = useMemo(() => (db ? collection(db, 'bookings') : null), [db]);
 
-  const { data: facilitiesData, loading: fLoading } = useCollection<Facility>(facilitiesQuery);
-  const { data: bookingsData, loading: bLoading } = useCollection<Booking>(bookingsQuery);
+  const { data: facilitiesData, loading: fLoading } = useCollection<Facility>(facilitiesRef);
+  const { data: bookingsData, loading: bLoading } = useCollection<Booking>(bookingsRef);
 
-  const facilities = facilitiesData && facilitiesData.length > 0 ? facilitiesData : INITIAL_FACILITIES;
-  const bookings = bookingsData || [];
+  // Fallback to initial mock data only if firestore has finished loading and is empty.
+  const facilities = useMemo(() => {
+    if (!fLoading && facilitiesData && facilitiesData.length > 0) return facilitiesData;
+    return INITIAL_FACILITIES;
+  }, [facilitiesData, fLoading]);
+
+  const bookings = useMemo(() => bookingsData || [], [bookingsData]);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('whereto_user');
-    if (savedUser) setCurrentUser(JSON.parse(savedUser));
+    if (savedUser) {
+      try {
+        setCurrentUser(JSON.parse(savedUser));
+      } catch (e) {
+        localStorage.removeItem('whereto_user');
+      }
+    }
   }, []);
 
-  // Seeding initial facilities
+  // Seeding initial facilities if the collection is truly empty after loading.
   useEffect(() => {
-    if (db && facilitiesData?.length === 0) {
+    if (db && !fLoading && facilitiesData?.length === 0) {
       INITIAL_FACILITIES.forEach(f => {
         const facilityRef = doc(db, 'facilities', f.id);
         setDoc(facilityRef, f).catch(() => {});
       });
     }
-  }, [db, facilitiesData]);
+  }, [db, facilitiesData, fLoading]);
 
   const loginWithEmail = (email: string, displayName?: string | null) => {
     const emailPrefix = email.split('@')[0].toUpperCase();
@@ -87,7 +98,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('whereto_user');
-    auth?.signOut();
+    auth?.signOut().catch(() => {});
   };
 
   const addBooking = (booking: Booking) => {
@@ -163,12 +174,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const value = useMemo(() => ({
+    currentUser, facilities, bookings, loading: fLoading || bLoading,
+    loginWithEmail, logout, addBooking, cancelBooking, approveBooking,
+    clearAllBookings, upsertFacility, deleteFacility
+  }), [currentUser, facilities, bookings, fLoading, bLoading]);
+
   return (
-    <StoreContext.Provider value={{
-      currentUser, facilities, bookings, loading: fLoading || bLoading,
-      loginWithEmail, logout, addBooking, cancelBooking, approveBooking,
-      clearAllBookings, upsertFacility, deleteFacility
-    }}>
+    <StoreContext.Provider value={value}>
       {children}
     </StoreContext.Provider>
   );
