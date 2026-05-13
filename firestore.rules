@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Prototype Mode: Full open access for development.
-    // Sync Version: 1.0.9 (Forced Redeploy)
+    // Manual sync check: Ensure this matches the Firebase Console.
     match /{document=**} {
       allow read, write: if true;
     }
