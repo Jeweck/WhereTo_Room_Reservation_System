@@ -29,7 +29,6 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from '@/hooks/use-toast';
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 const CATEGORIES = [
@@ -116,7 +115,7 @@ export default function FacilitiesPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-headline font-bold text-primary">Browse Facilities</h1>
-          <p className="text-muted-foreground">Select a category to view available rooms.</p>
+          <p className="text-muted-foreground">Select a category to view available rooms by number.</p>
         </div>
         <div className="flex gap-2">
           <div className="relative w-full md:w-64">
@@ -157,38 +156,32 @@ export default function FacilitiesPage() {
           </div>
         ) : (
           filteredFacilities.map((facility) => (
-            <Card key={facility.id} className="overflow-hidden border-none shadow-md group hover:shadow-xl transition-all duration-300">
-              <div className="relative h-48 overflow-hidden">
-                <Image 
-                  src={facility.imageUrl} 
-                  alt={facility.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  data-ai-hint={facility.purpose}
-                />
-                <div className="absolute top-3 right-3">
-                  <Badge className="bg-white/90 text-primary hover:bg-white backdrop-blur-sm border-none shadow-sm">
+            <Card key={facility.id} className="overflow-hidden border-none shadow-md group hover:shadow-xl transition-all duration-300 flex flex-col">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <Badge variant="outline" className="mb-2 border-primary/20 text-primary bg-primary/5">
                     {facility.purpose}
                   </Badge>
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Users className="w-3.5 h-3.5 text-secondary" />
+                    <span>{facility.capacity}</span>
+                  </div>
                 </div>
-              </div>
-              <CardHeader>
                 <CardTitle className="text-2xl group-hover:text-secondary transition-colors">{facility.name}</CardTitle>
                 <CardDescription className="line-clamp-2">{facility.description}</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1.5">
-                    <Users className="w-4 h-4 text-secondary" />
-                    <span>Capacity: {facility.capacity}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Package className="w-4 h-4 text-secondary" />
-                    <span>{facility.equipment.length} items</span>
+              <CardContent className="flex-1 pt-2">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {facility.equipment.map((item, idx) => (
+                      <span key={idx} className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded bg-accent text-primary uppercase">
+                        {item}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="bg-accent/20 pt-4">
+              <CardFooter className="bg-accent/10 border-t pt-4">
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button 
