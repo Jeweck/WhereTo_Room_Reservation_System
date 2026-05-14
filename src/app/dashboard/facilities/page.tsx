@@ -99,11 +99,11 @@ export default function FindRoomPage() {
         if (needsPcs && !f.equipment.some(e => e.toLowerCase().includes('pc') || e.toLowerCase().includes('computer'))) return false;
 
         // 4. Scheduling Constraint (CRITICAL: Prevents Double Booking)
-        // Checks against all CONFIRMED bookings for this facility on the specific date
+        // Checks against all ACTIVE (Confirmed or Pending) bookings for this facility
         const hasConflict = bookings.some(b => 
           b.facilityId === f.id && 
           b.date === date && 
-          b.status === 'confirmed' &&
+          (b.status === 'confirmed' || b.status === 'pending') &&
           isTimeOverlap(startTime, endTime, b.startTime, b.endTime)
         );
 
@@ -115,7 +115,7 @@ export default function FindRoomPage() {
 
       setRecommendations(sorted.map(r => ({
         ...r,
-        suitabilityReason: `Verified available for ${date} (${startTime}-${endTime}). Capacity fits ${r.capacity} students with ${r.equipment.join(', ')} equipment.`
+        suitabilityReason: `Verified completely available for ${date} (${startTime}-${endTime}). No overlapping requests or confirmed bookings.`
       })));
       
       setStep(3);
@@ -192,7 +192,7 @@ export default function FindRoomPage() {
               <Badge variant="secondary">{category}</Badge>
             </div>
             <CardTitle>Room Requirements</CardTitle>
-            <CardDescription>Constraint-based matching for your specific needs.</CardDescription>
+            <CardDescription>We'll find rooms that aren't already requested or booked.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -249,7 +249,7 @@ export default function FindRoomPage() {
           <CardFooter>
             <Button className="w-full h-12 text-lg font-bold bg-primary text-white hover:opacity-90" onClick={handleFindRoom} disabled={loading}>
               <Search className="w-5 h-5 mr-2" />
-              {loading ? "Checking Conflicts..." : "Run Automated Matching Engine"}
+              {loading ? "Checking Inventory..." : "Run Automated Matching Engine"}
             </Button>
           </CardFooter>
         </Card>
@@ -262,7 +262,7 @@ export default function FindRoomPage() {
               <ArrowLeft className="w-4 h-4 mr-2" /> Adjust Constraints
             </Button>
             <Badge className="bg-secondary text-secondary-foreground font-bold px-3 py-1">
-              {recommendations.length} CONFLICT-FREE MATCHES
+              {recommendations.length} AVAILABLE MATCHES
             </Badge>
           </div>
 
@@ -270,7 +270,7 @@ export default function FindRoomPage() {
             <Info className="w-4 h-4 text-primary" />
             <AlertTitle className="font-bold text-primary">Matching Algorithm Report</AlertTitle>
             <AlertDescription className="text-sm leading-relaxed mt-1">
-              The engine has processed {facilities.length} inventory records and verified their schedules. Only rooms with zero overlapping confirmed bookings for your time slot are shown below.
+              The engine has verified the inventory. Only rooms with zero overlapping requests (pending or confirmed) for your time slot are displayed.
             </AlertDescription>
           </Alert>
 
@@ -279,7 +279,7 @@ export default function FindRoomPage() {
               <Card className="p-12 text-center text-muted-foreground border-dashed">
                 <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-20" />
                 <p className="font-medium text-lg">No Availability for this Slot</p>
-                <p className="text-sm">Selected rooms are currently booked or don't meet requirements. Try another time or reduce equipment constraints.</p>
+                <p className="text-sm">Selected rooms are currently booked or have pending requests. Try another time or reduce equipment constraints.</p>
               </Card>
             ) : (
               recommendations.map((rec) => (
@@ -296,7 +296,7 @@ export default function FindRoomPage() {
                       </div>
                       <div className="space-y-1">
                         <div className="text-xs font-bold text-secondary flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> AVAILABILITY VERIFIED
+                          <CheckCircle2 className="w-3 h-3" /> CONFLICT-FREE
                         </div>
                         <p className="text-sm text-muted-foreground leading-relaxed">{rec.suitabilityReason}</p>
                       </div>
