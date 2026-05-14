@@ -150,11 +150,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     // 2. Automatically find and cancel all conflicting pending bookings
     const conflicts = bookings.filter(b => 
-      b.id !== id && // Not the one we just approved
-      b.status === 'pending' && // Only reject those still waiting
-      b.facilityId === bookingToApprove.facilityId && // Same room
-      b.date === bookingToApprove.date && // Same day
-      isTimeOverlap(bookingToApprove.startTime, bookingToApprove.endTime, b.startTime, b.endTime) // Clashing time
+      b.id !== id && 
+      b.status === 'pending' && 
+      b.facilityId === bookingToApprove.facilityId && 
+      b.date === bookingToApprove.date && 
+      isTimeOverlap(bookingToApprove.startTime, bookingToApprove.endTime, b.startTime, b.endTime)
     );
 
     conflicts.forEach(conflict => {
@@ -162,11 +162,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       batch.update(conflictRef, { status: 'cancelled' });
     });
 
-    // Commit the batch to ensure consistency
     batch.commit().catch(async () => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: '/bookings',
-        operation: 'update',
+        operation: 'write',
         requestResourceData: { status: 'confirmed/cancelled_batch' }
       }));
     });

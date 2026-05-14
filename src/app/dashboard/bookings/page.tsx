@@ -51,7 +51,7 @@ export default function MyBookingsPage() {
               <div className="flex flex-col md:flex-row">
                 <div className={`md:w-2 ${
                   booking.status === 'confirmed' ? 'bg-secondary' : 
-                  booking.status === 'pending' ? 'bg-yellow-400' : 'bg-muted-foreground/30'
+                  booking.status === 'pending' ? 'bg-yellow-400' : 'bg-destructive/50'
                 }`} />
                 <div className="flex-1 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-start gap-4">
@@ -85,8 +85,8 @@ export default function MyBookingsPage() {
                           <AlertCircle className="w-3 h-3 mr-1" /> Pending Approval
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-muted-foreground px-3 py-1">
-                          <XCircle className="w-3 h-3 mr-1" /> Cancelled
+                        <Badge variant="destructive" className="px-3 py-1">
+                          <XCircle className="w-3 h-3 mr-1" /> Cancelled / Rejected
                         </Badge>
                       )}
                     </div>
@@ -130,7 +130,7 @@ export default function MyBookingsPage() {
             Current & Pending ({activeBookings.length})
           </TabsTrigger>
           <TabsTrigger value="past" className="rounded-md data-[state=active]:bg-primary data-[state=active]:text-white">
-            History ({pastBookings.length})
+            History / Rejected ({pastBookings.length})
           </TabsTrigger>
         </TabsList>
 
