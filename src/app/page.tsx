@@ -91,7 +91,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-4">
       <div className="mb-8 text-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-700">
-        <div className="w-20 h-20 bg-transparent flex items-center justify-center">
+        <div className="w-20 h-20 bg-transparent mx-auto flex items-center justify-center">
           <svg
             width="80"
             height="80"
