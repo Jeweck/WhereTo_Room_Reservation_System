@@ -40,10 +40,12 @@ export default function SettingsPage() {
     e.preventDefault();
     if (!name.trim()) return;
     setIsUpdatingProfile(true);
-    // Persist name to Firestore
+    
+    // Persist name to Firestore via our store
     updateProfile(name);
+    
     setTimeout(() => {
-      toast({ title: "Profile Updated", description: "Your display name is now actually saved." });
+      toast({ title: "Profile Updated", description: "Your display name has been saved permanently." });
       setIsUpdatingProfile(false);
     }, 500);
   };
@@ -122,7 +124,7 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        <Card className="md:col-span-2 border-none shadow-md">
+        <Card className="md:col-span-2 border-none shadow-lg">
           <CardHeader>
             <CardTitle className="text-lg">Edit Profile</CardTitle>
             <CardDescription>Your custom display name is stored permanently in Firestore.</CardDescription>
@@ -137,7 +139,7 @@ export default function SettingsPage() {
                 <Label htmlFor="name">Display Name</Label>
                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name" />
               </div>
-              <Button type="submit" disabled={isUpdatingProfile} className="bg-primary shadow-lg hover:shadow-xl transition-all">
+              <Button type="submit" disabled={isUpdatingProfile} className="bg-primary shadow-md hover:shadow-xl transition-all">
                 {isUpdatingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Changes
               </Button>
@@ -159,7 +161,7 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        <Card className="md:col-span-2 border-none shadow-md">
+        <Card className="md:col-span-2 border-none shadow-lg">
           <CardHeader>
             <CardTitle className="text-lg">Change Password</CardTitle>
             <CardDescription>We recommend a mix of symbols and letters.</CardDescription>
@@ -202,17 +204,17 @@ export default function SettingsPage() {
             Integrations
           </h2>
           <p className="text-sm text-muted-foreground">
-            Switch between different school authentication accounts.
+            Sign in with another identity or switch accounts.
           </p>
         </div>
 
-        <Card className="md:col-span-2 border-none shadow-md">
+        <Card className="md:col-span-2 border-none shadow-lg">
           <CardHeader>
             <CardTitle className="text-lg">Authentication</CardTitle>
             <CardDescription>Manage your sign-in methods.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-xl bg-accent/30 border">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-accent/30 border shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
                   <Chrome className="w-5 h-5 text-blue-500" />

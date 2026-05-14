@@ -50,6 +50,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const bookings = useMemo(() => bookingsData || [], [bookingsData]);
 
+  // Restore session from local storage
   useEffect(() => {
     const savedUser = localStorage.getItem('whereto_user');
     if (savedUser) {
@@ -79,7 +80,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const role: Role = isAdmin ? 'admin' : 'student';
     const userId = auth?.currentUser?.uid || `user_${Math.random().toString(36).substr(2, 9)}`;
     
-    // FETCH EXISTING PROFILE to ensure the name is "actually saved"
+    // FETCH EXISTING PROFILE to ensure the name is persistent
     const userRef = doc(db, 'users', userId);
     const docSnap = await getDoc(userRef);
     
@@ -98,6 +99,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setCurrentUser(user);
     localStorage.setItem('whereto_user', JSON.stringify(user));
     
+    // Ensure Firestore is updated with basic info if it's a new user
     setDoc(userRef, user, { merge: true }).catch(async () => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: userRef.path,
@@ -115,6 +117,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const updateProfile = useCallback((name: string) => {
     if (!currentUser || !db) return;
+    
     const updatedUser = { ...currentUser, name };
     setCurrentUser(updatedUser);
     localStorage.setItem('whereto_user', JSON.stringify(updatedUser));
