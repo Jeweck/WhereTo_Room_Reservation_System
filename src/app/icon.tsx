@@ -18,30 +18,43 @@ export default function Icon() {
       // ImageResponse render element
       <div
         style={{
-          fontSize: 24,
-          background: 'white',
+          background: 'transparent',
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: '20%',
-          border: '1px solid #e5e7eb',
         }}
       >
         <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
+          width="32"
+          height="32"
+          viewBox="0 0 32 32"
           fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ color: '#064e3b' }} // Using the primary dark green/black color
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-          <circle cx="12" cy="10" r="3" />
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#f97316" />
+              <stop offset="100%" stopColor="#db2777" />
+            </linearGradient>
+          </defs>
+          <rect
+            x="3"
+            y="3"
+            width="26"
+            height="26"
+            rx="8"
+            stroke="url(#grad)"
+            strokeWidth="2.5"
+          />
+          <path
+            d="M20 10C20 10 12 10 12 16C12 22 20 22 20 16C20 16 20 10 12 10"
+            stroke="url(#grad)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </div>
     ),

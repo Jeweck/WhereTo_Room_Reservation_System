@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, ArrowRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -91,8 +91,37 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-4">
       <div className="mb-8 text-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-700">
-        <div className="w-20 h-20 bg-white rounded-[22%] mx-auto flex items-center justify-center shadow-2xl border border-gray-100">
-          <MapPin className="w-12 h-12 text-primary" strokeWidth={2.5} />
+        <div className="w-20 h-20 bg-transparent flex items-center justify-center">
+          <svg
+            width="80"
+            height="80"
+            viewBox="0 0 32 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient id="grad-logo" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#f97316" />
+                <stop offset="100%" stopColor="#db2777" />
+              </linearGradient>
+            </defs>
+            <rect
+              x="3"
+              y="3"
+              width="26"
+              height="26"
+              rx="8"
+              stroke="url(#grad-logo)"
+              strokeWidth="2"
+            />
+            <path
+              d="M20 10C20 10 12 10 12 16C12 22 20 22 20 16C20 16 20 10 12 10"
+              stroke="url(#grad-logo)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
         <div>
           <h1 className="text-4xl font-headline font-bold text-white tracking-tight">WhereTo</h1>

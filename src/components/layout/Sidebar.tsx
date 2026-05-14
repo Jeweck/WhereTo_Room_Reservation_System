@@ -10,8 +10,7 @@ import {
   CalendarCheck, 
   Settings, 
   LogOut,
-  ShieldCheck,
-  MapPin
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -55,8 +54,37 @@ export function Sidebar() {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="p-5 flex items-center gap-3 h-20 flex-shrink-0 overflow-hidden">
-        <div className="w-10 h-10 rounded-[22%] bg-white flex items-center justify-center flex-shrink-0 shadow-sm border border-gray-100/10">
-          <MapPin className="text-primary w-6 h-6" strokeWidth={2.5} />
+        <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient id="grad-sidebar" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#f97316" />
+                <stop offset="100%" stopColor="#db2777" />
+              </linearGradient>
+            </defs>
+            <rect
+              x="3"
+              y="3"
+              width="26"
+              height="26"
+              rx="8"
+              stroke="url(#grad-sidebar)"
+              strokeWidth="2"
+            />
+            <path
+              d="M20 10C20 10 12 10 12 16C12 22 20 22 20 16C20 16 20 10 12 10"
+              stroke="url(#grad-sidebar)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
         <span className={cn(
           "font-headline font-bold text-xl tracking-tight text-white whitespace-nowrap transition-all duration-300",
