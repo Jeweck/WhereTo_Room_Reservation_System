@@ -54,7 +54,6 @@ export function Sidebar() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Branding Area */}
       <div className="p-5 flex items-center gap-3 h-20 flex-shrink-0 overflow-hidden">
         <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm border-2 border-white">
           <MapPin className="text-primary w-6 h-6" strokeWidth={2.5} />
@@ -67,7 +66,6 @@ export function Sidebar() {
         </span>
       </div>
 
-      {/* Navigation Links */}
       <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto overflow-x-hidden scrollbar-hide">
         {menuItems.map((item) => (
           <Link
@@ -91,18 +89,10 @@ export function Sidebar() {
             )}>
               {item.label}
             </span>
-            
-            {/* Tooltip for collapsed state */}
-            {!isHovered && (
-              <div className="absolute left-full ml-4 px-2 py-1 bg-primary text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100] whitespace-nowrap border border-white/10 shadow-lg">
-                {item.label}
-              </div>
-            )}
           </Link>
         ))}
       </nav>
 
-      {/* User & Sign Out Area */}
       <div className="p-3 border-t border-sidebar-border/50 bg-sidebar-accent/20 overflow-hidden">
         <div className={cn(
           "flex items-center gap-3 p-2 mb-2 rounded-lg bg-sidebar-accent/30 overflow-hidden transition-all duration-300 relative",

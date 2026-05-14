@@ -61,6 +61,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Initialize facilities if empty
   useEffect(() => {
     if (db && !fLoading && facilitiesData?.length === 0) {
       INITIAL_FACILITIES.forEach(f => {
@@ -78,7 +79,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const role: Role = isAdmin ? 'admin' : 'student';
     const userId = auth?.currentUser?.uid || `user_${Math.random().toString(36).substr(2, 9)}`;
     
-    // Fetch existing profile to preserve the "Actually Saved" Display Name
+    // FETCH EXISTING PROFILE to ensure the name is "actually saved"
     const userRef = doc(db, 'users', userId);
     const docSnap = await getDoc(userRef);
     
@@ -166,6 +167,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const approvedRef = doc(db, 'bookings', id);
     batch.update(approvedRef, { status: 'confirmed' });
 
+    // Conflict Resolution: Reject overlapping pending requests
     const conflicts = bookings.filter(b => 
       b.id !== id && 
       b.status === 'pending' && 

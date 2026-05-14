@@ -1,11 +1,11 @@
 
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@/hooks/use-store';
 import { useAuth } from '@/firebase';
 import { updatePassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -30,13 +30,20 @@ export default function SettingsPage() {
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isSwitchingAccount, setIsSwitchingAccount] = useState(false);
 
+  useEffect(() => {
+    if (currentUser?.name) {
+      setName(currentUser.name);
+    }
+  }, [currentUser]);
+
   const handleUpdateName = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     setIsUpdatingProfile(true);
+    // Persist name to Firestore
+    updateProfile(name);
     setTimeout(() => {
-      updateProfile(name);
-      toast({ title: "Profile Updated", description: "Your display name has been changed and saved." });
+      toast({ title: "Profile Updated", description: "Your display name is now actually saved." });
       setIsUpdatingProfile(false);
     }, 500);
   };
@@ -118,7 +125,7 @@ export default function SettingsPage() {
         <Card className="md:col-span-2 border-none shadow-md">
           <CardHeader>
             <CardTitle className="text-lg">Edit Profile</CardTitle>
-            <CardDescription>Your custom display name is stored permanently.</CardDescription>
+            <CardDescription>Your custom display name is stored permanently in Firestore.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleUpdateName} className="space-y-4">
@@ -201,8 +208,8 @@ export default function SettingsPage() {
 
         <Card className="md:col-span-2 border-none shadow-md">
           <CardHeader>
-            <CardTitle className="text-lg">Google Account</CardTitle>
-            <CardDescription>Use your @gordoncollege.edu.ph Google account to sign in.</CardDescription>
+            <CardTitle className="text-lg">Authentication</CardTitle>
+            <CardDescription>Manage your sign-in methods.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-4 rounded-xl bg-accent/30 border">
