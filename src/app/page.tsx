@@ -99,27 +99,10 @@ export default function LoginPage() {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <linearGradient id="grad-logo" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#f97316" />
-                <stop offset="100%" stopColor="#db2777" />
-              </linearGradient>
-            </defs>
-            <rect
-              x="3"
-              y="3"
-              width="26"
-              height="26"
-              rx="8"
-              stroke="url(#grad-logo)"
-              strokeWidth="2"
-            />
+            <rect x="0" y="0" width="32" height="32" rx="8" fill="white" />
             <path
-              d="M20 10C20 10 12 10 12 16C12 22 20 22 20 16C20 16 20 10 12 10"
-              stroke="url(#grad-logo)"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              d="M16 6C12.6863 6 10 8.68629 10 12C10 16.5 16 26 16 26C16 26 22 16.5 22 12C22 8.68629 19.3137 6 16 6ZM16 14.5C14.6193 14.5 13.5 13.3807 13.5 12C13.5 10.6193 14.6193 9.5 16 9.5C17.3807 9.5 18.5 10.6193 18.5 12C18.5 13.3807 17.3807 14.5 16 14.5Z"
+              fill="black"
             />
           </svg>
         </div>
