@@ -37,7 +37,6 @@ export default function LoginPage() {
 
     setLoading(true);
     
-    // Role determination logic is handled inside useStore's loginWithEmail
     setTimeout(() => {
       loginWithEmail(email);
       router.push('/dashboard');
@@ -62,7 +61,6 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      // School domain validation
       if (user.email && !user.email.endsWith('gordoncollege.edu.ph')) {
         toast({
           title: "Access Denied",
@@ -75,7 +73,6 @@ export default function LoginPage() {
       }
 
       if (user.email) {
-        // Log in the user in our local store for dashboard access
         loginWithEmail(user.email, user.displayName);
         router.push('/dashboard');
       }
@@ -94,7 +91,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-4">
       <div className="mb-8 text-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-700">
-        <div className="w-20 h-20 bg-white rounded-2xl mx-auto flex items-center justify-center shadow-2xl border-4 border-white">
+        <div className="w-20 h-20 bg-white rounded-[22%] mx-auto flex items-center justify-center shadow-2xl border border-gray-100">
           <MapPin className="w-12 h-12 text-primary" strokeWidth={2.5} />
         </div>
         <div>

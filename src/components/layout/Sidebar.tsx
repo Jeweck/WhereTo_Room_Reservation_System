@@ -55,7 +55,7 @@ export function Sidebar() {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="p-5 flex items-center gap-3 h-20 flex-shrink-0 overflow-hidden">
-        <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm border-2 border-white">
+        <div className="w-10 h-10 rounded-[22%] bg-white flex items-center justify-center flex-shrink-0 shadow-sm border border-gray-100/10">
           <MapPin className="text-primary w-6 h-6" strokeWidth={2.5} />
         </div>
         <span className={cn(
