@@ -23,7 +23,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 
 export default function SettingsPage() {
-  const { currentUser, updateProfile, logout } = useStore();
+  const { currentUser, updateProfile, logout, loginWithEmail } = useStore();
   const auth = useAuth();
   
   const [name, setName] = useState(currentUser?.name || '');
@@ -31,7 +31,7 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-  const [isLinkingGoogle, setIsLinkingGoogle] = useState(false);
+  const [isSwitchingAccount, setIsSwitchingAccount] = useState(false);
 
   const handleUpdateName = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,17 +69,35 @@ export default function SettingsPage() {
     }
   };
 
-  const handleLinkGoogle = async () => {
+  const handleSwitchAccount = async () => {
     if (!auth) return;
-    setIsLinkingGoogle(true);
+    setIsSwitchingAccount(true);
     const provider = new GoogleAuthProvider();
+    // Force account selection
+    provider.setCustomParameters({ prompt: 'select_account' });
+    
     try {
-      await signInWithPopup(auth, provider);
-      toast({ title: "Google Linked", description: "You can now sign in with Google." });
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      if (user.email && !user.email.endsWith('gordoncollege.edu.ph')) {
+        toast({
+          title: "Access Denied",
+          description: "Only @gordoncollege.edu.ph accounts are allowed.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (user.email) {
+        loginWithEmail(user.email, user.displayName);
+        toast({ title: "Account Switched", description: `Signed in as ${user.email}` });
+        window.location.reload(); // Refresh to update all context
+      }
     } catch (error: any) {
-      toast({ title: "Link Failed", description: error.message, variant: "destructive" });
+      toast({ title: "Switch Failed", description: error.message, variant: "destructive" });
     } finally {
-      setIsLinkingGoogle(false);
+      setIsSwitchingAccount(false);
     }
   };
 
@@ -101,7 +119,7 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        <Card className="md:col-span-2 border-none shadow-sm">
+        <Card className="md:col-span-2 border-none shadow-md">
           <CardHeader>
             <CardTitle className="text-lg">Edit Profile</CardTitle>
             <CardDescription>Your name is visible to staff during approval.</CardDescription>
@@ -138,7 +156,7 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        <Card className="md:col-span-2 border-none shadow-sm">
+        <Card className="md:col-span-2 border-none shadow-md">
           <CardHeader>
             <CardTitle className="text-lg">Change Password</CardTitle>
             <CardDescription>We recommend a mix of symbols and letters.</CardDescription>
@@ -181,14 +199,14 @@ export default function SettingsPage() {
             Integrations
           </h2>
           <p className="text-sm text-muted-foreground">
-            Connect other authentication providers.
+            Switch between different school authentication accounts.
           </p>
         </div>
 
-        <Card className="md:col-span-2 border-none shadow-sm">
+        <Card className="md:col-span-2 border-none shadow-md">
           <CardHeader>
             <CardTitle className="text-lg">Google Account</CardTitle>
-            <CardDescription>Enable faster sign-in using your @gordoncollege.edu.ph Google account.</CardDescription>
+            <CardDescription>Use your @gordoncollege.edu.ph Google account to sign in.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-4 rounded-xl bg-accent/30 border">
@@ -197,18 +215,18 @@ export default function SettingsPage() {
                   <Chrome className="w-5 h-5 text-blue-500" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">Google Sign-In</p>
-                  <p className="text-xs text-muted-foreground">Standard school authentication</p>
+                  <p className="font-semibold text-sm">Switch Account</p>
+                  <p className="text-xs text-muted-foreground">Sign in with a different identity</p>
                 </div>
               </div>
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={handleLinkGoogle} 
-                disabled={isLinkingGoogle}
+                onClick={handleSwitchAccount} 
+                disabled={isSwitchingAccount}
                 className="font-bold"
               >
-                {isLinkingGoogle ? <Loader2 className="animate-spin" /> : "Link Account"}
+                {isSwitchingAccount ? <Loader2 className="animate-spin" /> : "Switch Account"}
               </Button>
             </div>
           </CardContent>
@@ -225,7 +243,7 @@ export default function SettingsPage() {
           }}
         >
           <LogOut className="w-5 h-5 mr-2" />
-          Sign Out of WhereTo
+          Sign Out
         </Button>
       </div>
     </div>
