@@ -1,0 +1,233 @@
+
+"use client"
+
+import { useState } from 'react';
+import { useStore } from '@/hooks/use-store';
+import { useAuth } from '@/firebase';
+import { updatePassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
+import { 
+  User, 
+  Lock, 
+  ShieldCheck, 
+  LogOut, 
+  Chrome,
+  CheckCircle2,
+  AlertTriangle,
+  Loader2
+} from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+
+export default function SettingsPage() {
+  const { currentUser, updateProfile, logout } = useStore();
+  const auth = useAuth();
+  
+  const [name, setName] = useState(currentUser?.name || '');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [isLinkingGoogle, setIsLinkingGoogle] = useState(false);
+
+  const handleUpdateName = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setIsUpdatingProfile(true);
+    setTimeout(() => {
+      updateProfile(name);
+      toast({ title: "Profile Updated", description: "Your display name has been changed." });
+      setIsUpdatingProfile(false);
+    }, 500);
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!auth?.currentUser) return;
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Mismatch", description: "Passwords do not match.", variant: "destructive" });
+      return;
+    }
+    
+    setIsUpdatingPassword(true);
+    try {
+      await updatePassword(auth.currentUser, newPassword);
+      toast({ title: "Password Changed", description: "Your account is now more secure." });
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error: any) {
+      toast({ 
+        title: "Security Error", 
+        description: error.message || "Please re-authenticate to change your password.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
+  const handleLinkGoogle = async () => {
+    if (!auth) return;
+    setIsLinkingGoogle(true);
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      toast({ title: "Google Linked", description: "You can now sign in with Google." });
+    } catch (error: any) {
+      toast({ title: "Link Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsLinkingGoogle(false);
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500 pb-20">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-headline font-bold text-primary">Settings</h1>
+        <p className="text-muted-foreground">Manage your school profile and account security.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-1 space-y-4">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <User className="w-5 h-5 text-secondary" />
+            Profile Details
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Update how you appear to administrators when booking facilities.
+          </p>
+        </div>
+
+        <Card className="md:col-span-2 border-none shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg">Edit Profile</CardTitle>
+            <CardDescription>Your name is visible to staff during approval.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleUpdateName} className="space-y-4">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input id="email" value={currentUser?.email} disabled className="bg-muted" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="name">Display Name</Label>
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name" />
+              </div>
+              <Button type="submit" disabled={isUpdatingProfile} className="bg-primary">
+                {isUpdatingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Separator />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-1 space-y-4">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Lock className="w-5 h-5 text-secondary" />
+            Security
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Ensure your school account remains protected.
+          </p>
+        </div>
+
+        <Card className="md:col-span-2 border-none shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg">Change Password</CardTitle>
+            <CardDescription>We recommend a mix of symbols and letters.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <div className="grid gap-2">
+                <Label htmlFor="new-pass">New Password</Label>
+                <Input 
+                  id="new-pass" 
+                  type="password" 
+                  value={newPassword} 
+                  onChange={(e) => setNewPassword(e.target.value)} 
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="confirm-pass">Confirm New Password</Label>
+                <Input 
+                  id="confirm-pass" 
+                  type="password" 
+                  value={confirmPassword} 
+                  onChange={(e) => setConfirmPassword(e.target.value)} 
+                />
+              </div>
+              <Button type="submit" disabled={isUpdatingPassword} variant="outline" className="border-primary text-primary hover:bg-primary/5">
+                {isUpdatingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Update Password
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Separator />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-1 space-y-4">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-secondary" />
+            Integrations
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Connect other authentication providers.
+          </p>
+        </div>
+
+        <Card className="md:col-span-2 border-none shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg">Google Account</CardTitle>
+            <CardDescription>Enable faster sign-in using your @gordoncollege.edu.ph Google account.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-accent/30 border">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
+                  <Chrome className="w-5 h-5 text-blue-500" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Google Sign-In</p>
+                  <p className="text-xs text-muted-foreground">Standard school authentication</p>
+                </div>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleLinkGoogle} 
+                disabled={isLinkingGoogle}
+                className="font-bold"
+              >
+                {isLinkingGoogle ? <Loader2 className="animate-spin" /> : "Link Account"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="pt-10 flex justify-center">
+        <Button 
+          variant="destructive" 
+          className="w-full max-w-sm h-12 text-lg font-bold shadow-xl"
+          onClick={() => {
+            logout();
+            window.location.href = '/';
+          }}
+        >
+          <LogOut className="w-5 h-5 mr-2" />
+          Sign Out of WhereTo
+        </Button>
+      </div>
+    </div>
+  );
+}

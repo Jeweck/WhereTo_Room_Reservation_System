@@ -22,13 +22,11 @@ interface StoreContextType {
   clearAllBookings: () => void;
   upsertFacility: (facility: Facility) => void;
   deleteFacility: (id: string) => void;
+  updateProfile: (name: string) => void;
 }
 
 const StoreContext = createContext<StoreContextType | null>(null);
 
-/**
- * Utility to check if two time ranges overlap.
- */
 const isTimeOverlap = (s1: string, e1: string, s2: string, e2: string) => {
   return s1 < e2 && e1 > s2;
 };
@@ -39,14 +37,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  // Stabilize query references using useMemo
   const facilitiesRef = useMemo(() => (db ? collection(db, 'facilities') : null), [db]);
   const bookingsRef = useMemo(() => (db ? collection(db, 'bookings') : null), [db]);
 
   const { data: facilitiesData, loading: fLoading } = useCollection<Facility>(facilitiesRef);
   const { data: bookingsData, loading: bLoading } = useCollection<Booking>(bookingsRef);
 
-  // Hydrate facilities with mock data if Firestore is empty
   const facilities = useMemo(() => {
     if (!fLoading && facilitiesData && facilitiesData.length > 0) return facilitiesData;
     return INITIAL_FACILITIES;
@@ -54,7 +50,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const bookings = useMemo(() => bookingsData || [], [bookingsData]);
 
-  // Load user from local storage on mount
   useEffect(() => {
     const savedUser = localStorage.getItem('whereto_user');
     if (savedUser) {
@@ -66,7 +61,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Seed initial data once if collection is empty
   useEffect(() => {
     if (db && !fLoading && facilitiesData?.length === 0) {
       INITIAL_FACILITIES.forEach(f => {
@@ -109,6 +103,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     auth?.signOut().catch(() => {});
   }, [auth]);
 
+  const updateProfile = useCallback((name: string) => {
+    if (!currentUser) return;
+    const updatedUser = { ...currentUser, name };
+    setCurrentUser(updatedUser);
+    localStorage.setItem('whereto_user', JSON.stringify(updatedUser));
+    
+    if (db) {
+      const userRef = doc(db, 'users', currentUser.id);
+      updateDoc(userRef, { name }).catch(async () => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: userRef.path,
+          operation: 'update',
+          requestResourceData: { name }
+        }));
+      });
+    }
+  }, [currentUser, db]);
+
   const addBooking = useCallback((booking: Booking) => {
     if (!db) return;
     const bookingRef = doc(db, 'bookings', booking.id);
@@ -144,11 +156,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     const batch = writeBatch(db);
 
-    // 1. Approve the targeted booking
     const approvedRef = doc(db, 'bookings', id);
     batch.update(approvedRef, { status: 'confirmed' });
 
-    // 2. Automatically find and cancel all conflicting pending bookings
     const conflicts = bookings.filter(b => 
       b.id !== id && 
       b.status === 'pending' && 
@@ -220,8 +230,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     approveBooking,
     clearAllBookings, 
     upsertFacility, 
-    deleteFacility
-  }), [currentUser, facilities, bookings, fLoading, bLoading, loginWithEmail, logout, addBooking, cancelBooking, approveBooking, clearAllBookings, upsertFacility, deleteFacility]);
+    deleteFacility,
+    updateProfile
+  }), [currentUser, facilities, bookings, fLoading, bLoading, loginWithEmail, logout, addBooking, cancelBooking, approveBooking, clearAllBookings, upsertFacility, deleteFacility, updateProfile]);
 
   return (
     <StoreContext.Provider value={value}>

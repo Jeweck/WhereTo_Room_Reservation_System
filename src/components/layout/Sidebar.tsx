@@ -8,7 +8,7 @@ import {
   LayoutDashboard, 
   Building2, 
   CalendarCheck, 
-  Sparkles, 
+  Settings, 
   LogOut,
   ShieldCheck,
   MapPin
@@ -26,7 +26,7 @@ export function Sidebar() {
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { label: 'Facilities', href: '/dashboard/facilities', icon: Building2 },
     { label: 'My Bookings', href: '/dashboard/bookings', icon: CalendarCheck },
-    { label: 'AI Assistant', href: '/dashboard/recommend', icon: Sparkles },
+    { label: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];
 
   if (currentUser?.role === 'admin') {
