@@ -5,7 +5,7 @@ import React, { createContext, useContext, useEffect, useState, useMemo, useCall
 import { User, Facility, Booking, Role } from '@/lib/types';
 import { INITIAL_FACILITIES } from '@/lib/mock-data';
 import { useFirestore, useAuth, useCollection } from '@/firebase';
-import { doc, setDoc, updateDoc, deleteDoc, collection, writeBatch, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, deleteDoc, collection, writeBatch, serverTimestamp, getDoc } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -14,7 +14,7 @@ interface StoreContextType {
   facilities: Facility[];
   bookings: Booking[];
   loading: boolean;
-  loginWithEmail: (email: string, displayName?: string | null) => void;
+  loginWithEmail: (email: string, displayName?: string | null) => Promise<void>;
   logout: () => void;
   addBooking: (booking: Booking) => void;
   cancelBooking: (id: string) => void;
@@ -70,14 +70,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, [db, facilitiesData, fLoading]);
 
-  const loginWithEmail = useCallback((email: string, displayName?: string | null) => {
+  const loginWithEmail = useCallback(async (email: string, displayName?: string | null) => {
+    if (!db) return;
+    
     const emailPrefix = email.split('@')[0].toUpperCase();
     const isAdmin = emailPrefix.includes('ADMIN');
     const role: Role = isAdmin ? 'admin' : 'student';
+    const userId = auth?.currentUser?.uid || `user_${Math.random().toString(36).substr(2, 9)}`;
     
+    // Fetch existing profile to preserve the "Actually Saved" Display Name
+    const userRef = doc(db, 'users', userId);
+    const docSnap = await getDoc(userRef);
+    
+    let finalName = displayName || email.split('@')[0];
+    if (docSnap.exists()) {
+      finalName = docSnap.data().name || finalName;
+    }
+
     const user: User = {
-      id: auth?.currentUser?.uid || `user_${Math.random().toString(36).substr(2, 9)}`,
-      name: displayName || email.split('@')[0],
+      id: userId,
+      name: finalName,
       email,
       role
     };
@@ -85,16 +97,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setCurrentUser(user);
     localStorage.setItem('whereto_user', JSON.stringify(user));
     
-    if (db) {
-      const userRef = doc(db, 'users', user.id);
-      setDoc(userRef, user, { merge: true }).catch(async () => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-          path: userRef.path,
-          operation: 'write',
-          requestResourceData: user
-        }));
-      });
-    }
+    setDoc(userRef, user, { merge: true }).catch(async () => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: userRef.path,
+        operation: 'write',
+        requestResourceData: user
+      }));
+    });
   }, [db, auth]);
 
   const logout = useCallback(() => {
@@ -104,21 +113,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [auth]);
 
   const updateProfile = useCallback((name: string) => {
-    if (!currentUser) return;
+    if (!currentUser || !db) return;
     const updatedUser = { ...currentUser, name };
     setCurrentUser(updatedUser);
     localStorage.setItem('whereto_user', JSON.stringify(updatedUser));
     
-    if (db) {
-      const userRef = doc(db, 'users', currentUser.id);
-      updateDoc(userRef, { name }).catch(async () => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-          path: userRef.path,
-          operation: 'update',
-          requestResourceData: { name }
-        }));
-      });
-    }
+    const userRef = doc(db, 'users', currentUser.id);
+    updateDoc(userRef, { name }).catch(async () => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: userRef.path,
+        operation: 'update',
+        requestResourceData: { name }
+      }));
+    });
   }, [currentUser, db]);
 
   const addBooking = useCallback((booking: Booking) => {

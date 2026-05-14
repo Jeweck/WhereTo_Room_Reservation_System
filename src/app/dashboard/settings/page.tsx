@@ -14,16 +14,13 @@ import {
   User, 
   Lock, 
   ShieldCheck, 
-  LogOut, 
   Chrome,
-  CheckCircle2,
-  AlertTriangle,
   Loader2
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 export default function SettingsPage() {
-  const { currentUser, updateProfile, logout, loginWithEmail } = useStore();
+  const { currentUser, updateProfile, loginWithEmail } = useStore();
   const auth = useAuth();
   
   const [name, setName] = useState(currentUser?.name || '');
@@ -39,7 +36,7 @@ export default function SettingsPage() {
     setIsUpdatingProfile(true);
     setTimeout(() => {
       updateProfile(name);
-      toast({ title: "Profile Updated", description: "Your display name has been changed." });
+      toast({ title: "Profile Updated", description: "Your display name has been changed and saved." });
       setIsUpdatingProfile(false);
     }, 500);
   };
@@ -73,7 +70,6 @@ export default function SettingsPage() {
     if (!auth) return;
     setIsSwitchingAccount(true);
     const provider = new GoogleAuthProvider();
-    // Force account selection
     provider.setCustomParameters({ prompt: 'select_account' });
     
     try {
@@ -90,9 +86,9 @@ export default function SettingsPage() {
       }
 
       if (user.email) {
-        loginWithEmail(user.email, user.displayName);
+        await loginWithEmail(user.email, user.displayName);
         toast({ title: "Account Switched", description: `Signed in as ${user.email}` });
-        window.location.reload(); // Refresh to update all context
+        window.location.reload();
       }
     } catch (error: any) {
       toast({ title: "Switch Failed", description: error.message, variant: "destructive" });
@@ -122,7 +118,7 @@ export default function SettingsPage() {
         <Card className="md:col-span-2 border-none shadow-md">
           <CardHeader>
             <CardTitle className="text-lg">Edit Profile</CardTitle>
-            <CardDescription>Your name is visible to staff during approval.</CardDescription>
+            <CardDescription>Your custom display name is stored permanently.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleUpdateName} className="space-y-4">
@@ -134,7 +130,7 @@ export default function SettingsPage() {
                 <Label htmlFor="name">Display Name</Label>
                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name" />
               </div>
-              <Button type="submit" disabled={isUpdatingProfile} className="bg-primary">
+              <Button type="submit" disabled={isUpdatingProfile} className="bg-primary shadow-lg hover:shadow-xl transition-all">
                 {isUpdatingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Changes
               </Button>
@@ -181,7 +177,7 @@ export default function SettingsPage() {
                   onChange={(e) => setConfirmPassword(e.target.value)} 
                 />
               </div>
-              <Button type="submit" disabled={isUpdatingPassword} variant="outline" className="border-primary text-primary hover:bg-primary/5">
+              <Button type="submit" disabled={isUpdatingPassword} variant="outline" className="border-primary text-primary hover:bg-primary/5 shadow-sm">
                 {isUpdatingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Update Password
               </Button>
@@ -224,27 +220,13 @@ export default function SettingsPage() {
                 size="sm" 
                 onClick={handleSwitchAccount} 
                 disabled={isSwitchingAccount}
-                className="font-bold"
+                className="font-bold shadow-sm"
               >
                 {isSwitchingAccount ? <Loader2 className="animate-spin" /> : "Switch Account"}
               </Button>
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      <div className="pt-10 flex justify-center">
-        <Button 
-          variant="destructive" 
-          className="w-full max-w-sm h-12 text-lg font-bold shadow-xl"
-          onClick={() => {
-            logout();
-            window.location.href = '/';
-          }}
-        >
-          <LogOut className="w-5 h-5 mr-2" />
-          Sign Out
-        </Button>
       </div>
     </div>
   );
