@@ -90,19 +90,19 @@ export default function AdminPage() {
         </TabsList>
 
         <TabsContent value="pending" className="space-y-6">
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-6">
             {pendingBookings.length === 0 ? (
-              <div className="py-20 text-center text-muted-foreground bg-white rounded-xl border border-dashed">
+              <div className="py-20 text-center text-muted-foreground bg-white rounded-xl border border-dashed shadow-sm">
                 <Inbox className="w-12 h-12 mx-auto mb-4 opacity-10" />
                 <p>No pending requests at the moment.</p>
               </div>
             ) : (
               pendingBookings.map((booking) => (
-                <Card key={booking.id} className="border-none shadow-sm overflow-hidden hover:shadow-md transition-all">
+                <Card key={booking.id} className="border-none shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
                   <CardContent className="p-0">
                     <div className="flex">
                       <div className="w-2 bg-yellow-400" />
-                      <div className="flex-1 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                      <div className="flex-1 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <h3 className="font-bold text-lg">{booking.facilityName}</h3>
@@ -126,14 +126,14 @@ export default function AdminPage() {
 
                         <div className="flex gap-2 w-full md:w-auto">
                           <Button 
-                            className="flex-1 md:flex-none bg-green-600 text-white hover:bg-green-700"
+                            className="flex-1 md:flex-none bg-green-600 text-white hover:bg-green-700 shadow-md"
                             onClick={() => handleApprove(booking.id)}
                           >
                             <CheckCircle2 className="w-4 h-4 mr-2" /> Approve
                           </Button>
                           <Button 
                             variant="outline" 
-                            className="flex-1 md:flex-none text-destructive hover:bg-destructive/10 border-destructive/20"
+                            className="flex-1 md:flex-none text-destructive hover:bg-destructive/10 border-destructive/20 shadow-sm"
                             onClick={() => {
                               cancelBooking(booking.id);
                               toast({ title: "Rejected", description: "The reservation has been rejected." });
@@ -156,7 +156,7 @@ export default function AdminPage() {
             <div className="flex justify-end px-1">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10 border-destructive/20 font-semibold">
+                  <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10 border-destructive/20 font-semibold shadow-sm">
                     <Trash2 className="w-4 h-4 mr-2" /> Clear All Records
                   </Button>
                 </AlertDialogTrigger>
@@ -180,13 +180,13 @@ export default function AdminPage() {
           
           <div className="grid grid-cols-1 gap-4">
             {allBookings.length === 0 ? (
-              <div className="py-20 text-center text-muted-foreground bg-white rounded-xl border border-dashed">
+              <div className="py-20 text-center text-muted-foreground bg-white rounded-xl border border-dashed shadow-sm">
                 <CalendarDays className="w-12 h-12 mx-auto mb-4 opacity-10" />
                 <p>No booking records found.</p>
               </div>
             ) : (
               allBookings.map((booking) => (
-                <Card key={booking.id} className="border-none shadow-sm overflow-hidden opacity-90">
+                <Card key={booking.id} className="border-none shadow-md overflow-hidden opacity-95">
                   <CardContent className="p-5 flex items-center justify-between">
                     <div>
                       <h3 className="font-bold">{booking.facilityName}</h3>

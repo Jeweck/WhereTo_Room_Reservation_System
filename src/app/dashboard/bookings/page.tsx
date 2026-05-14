@@ -38,7 +38,7 @@ export default function MyBookingsPage() {
   };
 
   const BookingList = ({ list }: { list: any[] }) => (
-    <div className="grid gap-4">
+    <div className="grid gap-6">
       {list.length === 0 ? (
         <div className="py-20 text-center text-muted-foreground">
           <History className="w-12 h-12 mx-auto mb-4 opacity-10" />
@@ -46,14 +46,14 @@ export default function MyBookingsPage() {
         </div>
       ) : (
         list.map((booking) => (
-          <Card key={booking.id} className="border-none shadow-sm overflow-hidden hover:shadow-md transition-all">
+          <Card key={booking.id} className="border-none shadow-md overflow-hidden hover:shadow-xl transition-all duration-300">
             <CardContent className="p-0">
               <div className="flex flex-col md:flex-row">
                 <div className={`md:w-2 ${
                   booking.status === 'confirmed' ? 'bg-secondary' : 
                   booking.status === 'pending' ? 'bg-yellow-400' : 'bg-destructive/50'
                 }`} />
-                <div className="flex-1 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex-1 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-start gap-4">
                     <div className="hidden sm:flex w-14 h-14 rounded-2xl bg-primary/5 items-center justify-center flex-shrink-0">
                       <Calendar className="w-6 h-6 text-primary" />
@@ -94,7 +94,7 @@ export default function MyBookingsPage() {
                     {(booking.status === 'confirmed' || booking.status === 'pending') && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-muted-foreground">
+                          <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-accent rounded-full">
                             <MoreVertical className="w-5 h-5" />
                           </Button>
                         </DropdownMenuTrigger>

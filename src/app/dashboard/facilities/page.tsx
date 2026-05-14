@@ -56,7 +56,6 @@ export default function FindRoomPage() {
 
   /**
    * Robust Time Overlap Detection
-   * Logic: (StartA < EndB) and (EndA > StartB)
    */
   const isTimeOverlap = (s1: string, e1: string, s2: string, e2: string) => {
     return s1 < e2 && e1 > s2;
@@ -99,7 +98,6 @@ export default function FindRoomPage() {
         if (needsPcs && !f.equipment.some(e => e.toLowerCase().includes('pc') || e.toLowerCase().includes('computer'))) return false;
 
         // 4. Scheduling Constraint (CRITICAL: Prevents Double Booking)
-        // Checks against all ACTIVE (Confirmed or Pending) bookings for this facility
         const hasConflict = bookings.some(b => 
           b.facilityId === f.id && 
           b.date === date && 
@@ -110,12 +108,11 @@ export default function FindRoomPage() {
         return !hasConflict;
       });
 
-      // Sort results by "Best Fit" (closest capacity first to optimize usage)
       const sorted = matched.sort((a, b) => a.capacity - b.capacity);
 
       setRecommendations(sorted.map(r => ({
         ...r,
-        suitabilityReason: `Verified completely available for ${date} (${startTime}-${endTime}). No overlapping requests or confirmed bookings.`
+        suitabilityReason: `Verified available for ${date} (${startTime}-${endTime}). Fits all your requested constraints.`
       })));
       
       setStep(3);
@@ -144,7 +141,6 @@ export default function FindRoomPage() {
       description: `Reservation for ${rec.name} has been sent for administrative approval.` 
     });
     setStep(1);
-    // Reset form
     setPurpose('');
     setStartTime('');
     setEndTime('');
@@ -158,11 +154,11 @@ export default function FindRoomPage() {
       </div>
 
       {step === 1 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {CATEGORIES.map((cat) => (
             <Card 
               key={cat.label} 
-              className={`cursor-pointer border-2 transition-all hover:shadow-md group ${category === cat.label ? 'border-secondary bg-secondary/5' : 'border-transparent'}`}
+              className={`cursor-pointer border-2 transition-all hover:shadow-xl group ${category === cat.label ? 'border-secondary bg-secondary/5 shadow-lg' : 'border-transparent shadow-md'}`}
               onClick={() => {
                 setCategory(cat.label);
                 setStep(2);
@@ -183,10 +179,10 @@ export default function FindRoomPage() {
       )}
 
       {step === 2 && (
-        <Card className="border-none shadow-xl">
+        <Card className="border-none shadow-2xl overflow-hidden">
           <CardHeader>
             <div className="flex items-center gap-2 mb-2">
-              <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="p-0 h-auto">
+              <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="p-0 h-auto hover:bg-transparent text-primary">
                 <ArrowLeft className="w-4 h-4 mr-1" /> Back to Categories
               </Button>
               <Badge variant="secondary">{category}</Badge>
@@ -212,7 +208,7 @@ export default function FindRoomPage() {
 
               <div className="space-y-4">
                 <Label>Essential Equipment Constraints</Label>
-                <div className="flex flex-col gap-3 p-4 bg-accent/30 rounded-lg">
+                <div className="flex flex-col gap-3 p-4 bg-accent/30 rounded-lg border border-accent/50">
                   <div className="flex items-center space-x-2">
                     <Checkbox id="tv" checked={needsTv} onCheckedChange={(checked) => setNeedsTv(!!checked)} />
                     <Label htmlFor="tv" className="flex items-center gap-2 cursor-pointer">
@@ -247,7 +243,7 @@ export default function FindRoomPage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full h-12 text-lg font-bold bg-primary text-white hover:opacity-90" onClick={handleFindRoom} disabled={loading}>
+            <Button className="w-full h-12 text-lg font-bold bg-primary text-white hover:opacity-90 shadow-lg" onClick={handleFindRoom} disabled={loading}>
               <Search className="w-5 h-5 mr-2" />
               {loading ? "Checking Inventory..." : "Run Automated Matching Engine"}
             </Button>
@@ -266,24 +262,24 @@ export default function FindRoomPage() {
             </Badge>
           </div>
 
-          <Alert className="bg-primary/5 border-primary/20">
+          <Alert className="bg-primary/5 border-primary/20 shadow-sm">
             <Info className="w-4 h-4 text-primary" />
             <AlertTitle className="font-bold text-primary">Matching Algorithm Report</AlertTitle>
             <AlertDescription className="text-sm leading-relaxed mt-1">
-              The engine has verified the inventory. Only rooms with zero overlapping requests (pending or confirmed) for your time slot are displayed.
+              Only rooms with zero overlapping requests (pending or confirmed) for your time slot are displayed.
             </AlertDescription>
           </Alert>
 
-          <div className="grid gap-4">
+          <div className="grid gap-6">
             {recommendations.length === 0 ? (
-              <Card className="p-12 text-center text-muted-foreground border-dashed">
+              <Card className="p-12 text-center text-muted-foreground border-dashed shadow-md">
                 <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-20" />
                 <p className="font-medium text-lg">No Availability for this Slot</p>
-                <p className="text-sm">Selected rooms are currently booked or have pending requests. Try another time or reduce equipment constraints.</p>
+                <p className="text-sm">Selected rooms are currently booked or have pending requests.</p>
               </Card>
             ) : (
               recommendations.map((rec) => (
-                <Card key={rec.id} className="border-none shadow-md overflow-hidden hover:shadow-lg transition-all">
+                <Card key={rec.id} className="border-none shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
                   <div className="flex flex-col md:flex-row">
                     <div className="w-full md:w-40 bg-primary text-white p-6 flex flex-col justify-center items-center text-center">
                       <span className="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-1">Room No.</span>
@@ -298,18 +294,18 @@ export default function FindRoomPage() {
                         <div className="text-xs font-bold text-secondary flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3" /> CONFLICT-FREE
                         </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{rec.suitabilityReason}</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed italic">{rec.suitabilityReason}</p>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {rec.equipment.map((eq: string) => (
-                          <span key={eq} className="px-2 py-0.5 rounded bg-accent text-[10px] font-bold text-primary uppercase">
+                          <span key={eq} className="px-2 py-0.5 rounded bg-accent text-[10px] font-bold text-primary uppercase border border-primary/10">
                             {eq}
                           </span>
                         ))}
                       </div>
                     </CardContent>
                     <div className="p-6 md:border-l border-dashed flex flex-col justify-center bg-accent/10">
-                      <Button className="w-full md:w-auto font-bold bg-secondary hover:bg-secondary/90 text-white" onClick={() => handleBooking(rec)}>
+                      <Button className="w-full md:w-auto font-bold bg-secondary hover:bg-secondary/90 text-white shadow-md" onClick={() => handleBooking(rec)}>
                         Reserve Room
                       </Button>
                     </div>
