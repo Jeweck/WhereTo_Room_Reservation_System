@@ -59,6 +59,14 @@ export default function AdminPage() {
     });
   };
 
+  const handleApprove = (id: string) => {
+    approveBooking(id);
+    toast({ 
+      title: "Confirmed", 
+      description: "Reservation confirmed. Overlapping pending requests have been automatically rejected." 
+    });
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -119,10 +127,7 @@ export default function AdminPage() {
                         <div className="flex gap-2 w-full md:w-auto">
                           <Button 
                             className="flex-1 md:flex-none bg-green-600 text-white hover:bg-green-700"
-                            onClick={() => {
-                              approveBooking(booking.id);
-                              toast({ title: "Approved", description: "The reservation has been confirmed." });
-                            }}
+                            onClick={() => handleApprove(booking.id)}
                           >
                             <CheckCircle2 className="w-4 h-4 mr-2" /> Approve
                           </Button>

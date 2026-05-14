@@ -26,6 +26,13 @@ interface StoreContextType {
 
 const StoreContext = createContext<StoreContextType | null>(null);
 
+/**
+ * Utility to check if two time ranges overlap.
+ */
+const isTimeOverlap = (s1: string, e1: string, s2: string, e2: string) => {
+  return s1 < e2 && e1 > s2;
+};
+
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const db = useFirestore();
   const auth = useAuth();
@@ -131,15 +138,39 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const approveBooking = useCallback((id: string) => {
     if (!db) return;
-    const bookingRef = doc(db, 'bookings', id);
-    updateDoc(bookingRef, { status: 'confirmed' }).catch(async () => {
+    
+    const bookingToApprove = bookings.find(b => b.id === id);
+    if (!bookingToApprove) return;
+
+    const batch = writeBatch(db);
+
+    // 1. Approve the targeted booking
+    const approvedRef = doc(db, 'bookings', id);
+    batch.update(approvedRef, { status: 'confirmed' });
+
+    // 2. Automatically find and cancel all conflicting pending bookings
+    const conflicts = bookings.filter(b => 
+      b.id !== id && // Not the one we just approved
+      b.status === 'pending' && // Only reject those still waiting
+      b.facilityId === bookingToApprove.facilityId && // Same room
+      b.date === bookingToApprove.date && // Same day
+      isTimeOverlap(bookingToApprove.startTime, bookingToApprove.endTime, b.startTime, b.endTime) // Clashing time
+    );
+
+    conflicts.forEach(conflict => {
+      const conflictRef = doc(db, 'bookings', conflict.id);
+      batch.update(conflictRef, { status: 'cancelled' });
+    });
+
+    // Commit the batch to ensure consistency
+    batch.commit().catch(async () => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: bookingRef.path,
+        path: '/bookings',
         operation: 'update',
-        requestResourceData: { status: 'confirmed' }
+        requestResourceData: { status: 'confirmed/cancelled_batch' }
       }));
     });
-  }, [db]);
+  }, [db, bookings]);
 
   const clearAllBookings = useCallback(() => {
     if (!db || !bookings.length) return;
