@@ -125,10 +125,9 @@ export function Sidebar() {
           </div>
         </div>
         
-        <Button 
-          variant="ghost" 
+        <button 
           className={cn(
-            "w-full transition-all duration-200 text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 group h-10 overflow-hidden",
+            "flex w-full items-center transition-all duration-200 text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 group h-10 overflow-hidden rounded-md",
             isHovered ? "justify-start px-3" : "justify-center p-0"
           )}
           onClick={() => {
@@ -141,12 +140,12 @@ export function Sidebar() {
             isHovered ? "mr-3" : ""
           )} />
           <span className={cn(
-            "transition-all duration-300 whitespace-nowrap",
+            "transition-all duration-300 whitespace-nowrap text-sm font-medium",
             isHovered ? "opacity-100 translate-x-0" : "opacity-0 absolute"
           )}>
             Sign Out
           </span>
-        </Button>
+        </button>
       </div>
     </div>
   );
