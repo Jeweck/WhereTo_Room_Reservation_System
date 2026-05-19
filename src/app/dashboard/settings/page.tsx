@@ -43,7 +43,7 @@ export default function SettingsPage() {
     updateProfile(name);
     
     setTimeout(() => {
-      toast({ title: "Profile Updated", description: "Your display name has been saved permanently." });
+      toast({ title: "Profile Updated", description: "Your display name has been saved permanently in Firestore." });
       setIsUpdatingProfile(false);
     }, 500);
   };

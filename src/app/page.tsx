@@ -22,7 +22,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email.endsWith('gordoncollege.edu.ph')) {
@@ -35,12 +35,14 @@ export default function LoginPage() {
     }
 
     setLoading(true);
-    
-    setTimeout(() => {
-      loginWithEmail(email);
+    try {
+      await loginWithEmail(email);
       router.push('/dashboard');
+    } catch (error) {
+      toast({ title: "Login Failed", description: "Could not authenticate your account.", variant: "destructive" });
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const handleGoogleLogin = async () => {
@@ -72,7 +74,7 @@ export default function LoginPage() {
       }
 
       if (user.email) {
-        loginWithEmail(user.email, user.displayName);
+        await loginWithEmail(user.email, user.displayName);
         router.push('/dashboard');
       }
     } catch (error: any) {

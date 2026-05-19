@@ -78,6 +78,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const role: Role = isAdmin ? 'admin' : 'student';
     const userId = auth?.currentUser?.uid || `user_${email.split('@')[0]}`;
     
+    // FETCH PERSISTENT PROFILE FROM FIRESTORE
     const userRef = doc(db, 'users', userId);
     const docSnap = await getDoc(userRef);
     
