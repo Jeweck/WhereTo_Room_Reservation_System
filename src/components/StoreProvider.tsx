@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
@@ -50,7 +49,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const bookings = useMemo(() => bookingsData || [], [bookingsData]);
 
-  // Restore session from local storage
   useEffect(() => {
     const savedUser = localStorage.getItem('whereto_user');
     if (savedUser) {
@@ -63,7 +61,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Initialize facilities if empty
   useEffect(() => {
     if (db && !fLoading && facilitiesData?.length === 0) {
       INITIAL_FACILITIES.forEach(f => {
@@ -79,9 +76,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const emailPrefix = email.split('@')[0].toUpperCase();
     const isAdmin = emailPrefix.includes('ADMIN');
     const role: Role = isAdmin ? 'admin' : 'student';
-    const userId = auth?.currentUser?.uid || `user_${Math.random().toString(36).substr(2, 9)}`;
+    const userId = auth?.currentUser?.uid || `user_${email.split('@')[0]}`;
     
-    // FETCH EXISTING PROFILE to ensure the name is persistent
     const userRef = doc(db, 'users', userId);
     const docSnap = await getDoc(userRef);
     
@@ -101,7 +97,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setCurrentUser(user);
     localStorage.setItem('whereto_user', JSON.stringify(user));
     
-    // Ensure Firestore is updated with basic info if it's a new user
     setDoc(userRef, user, { merge: true }).catch(async () => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: userRef.path,
@@ -172,7 +167,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const approvedRef = doc(db, 'bookings', id);
     batch.update(approvedRef, { status: 'confirmed' });
 
-    // Conflict Resolution: Reject overlapping pending requests
     const conflicts = bookings.filter(b => 
       b.id !== id && 
       b.status === 'pending' && 

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from 'react';
@@ -41,7 +40,6 @@ export default function SettingsPage() {
     if (!name.trim()) return;
     setIsUpdatingProfile(true);
     
-    // Persist name to Firestore via our store
     updateProfile(name);
     
     setTimeout(() => {

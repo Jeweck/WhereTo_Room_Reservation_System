@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from 'react';
@@ -91,19 +90,15 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-4">
       <div className="mb-8 text-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-700">
-        <div className="w-20 h-20 bg-white rounded-[20%] mx-auto flex items-center justify-center shadow-2xl">
+        <div className="w-20 h-20 bg-white rounded-[24%] mx-auto flex items-center justify-center shadow-2xl">
           <svg
             width="48"
             height="48"
             viewBox="0 0 24 24"
-            fill="none"
-            stroke="black"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            fill="black"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-            <circle cx="12" cy="10" r="3" />
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
           </svg>
         </div>
         <div>
