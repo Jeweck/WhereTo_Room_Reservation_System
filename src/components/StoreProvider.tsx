@@ -55,7 +55,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const savedUser = localStorage.getItem('whereto_user');
     if (savedUser) {
       try {
-        setCurrentUser(JSON.parse(savedUser));
+        const parsed = JSON.parse(savedUser);
+        setCurrentUser(parsed);
       } catch (e) {
         localStorage.removeItem('whereto_user');
       }
@@ -86,7 +87,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     
     let finalName = displayName || email.split('@')[0];
     if (docSnap.exists()) {
-      finalName = docSnap.data().name || finalName;
+      const data = docSnap.data();
+      if (data.name) finalName = data.name;
     }
 
     const user: User = {

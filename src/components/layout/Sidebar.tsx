@@ -54,14 +54,19 @@ export function Sidebar() {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="p-5 flex items-center gap-3 h-20 flex-shrink-0 overflow-hidden">
-        <div className="w-10 h-10 bg-white rounded-[22%] flex items-center justify-center flex-shrink-0 shadow-lg">
+        <div className="w-10 h-10 bg-white rounded-[20%] flex items-center justify-center flex-shrink-0 shadow-lg">
           <svg
             width="24"
             height="24"
             viewBox="0 0 24 24"
-            fill="black"
+            fill="none"
+            stroke="black"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+            <circle cx="12" cy="10" r="3" />
           </svg>
         </div>
         <span className={cn(
