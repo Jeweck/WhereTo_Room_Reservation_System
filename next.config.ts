@@ -1,9 +1,6 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: 'export',
-  basePath: '/WhereTo_Room_Reservation_System',
-
   typescript: {
     ignoreBuildErrors: true,
   },
